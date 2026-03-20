@@ -19,7 +19,7 @@ import {
   METRICS_DIR,
   INDEX_FILE,
 } from './branch.js';
-import { getRepoName } from '../utils/git.js';
+import { getRepoName, getGithubUrl } from '../utils/git.js';
 import { logger } from '../utils/logger.js';
 
 // ─── Build snapshot ───────────────────────────────────────────────────────────
@@ -40,6 +40,7 @@ export function buildSnapshot(params: {
     commit: params.commit,
     commit_message: params.commitMessage,
     repo: getRepoName(params.cwd),
+    github_url: getGithubUrl(params.cwd) ?? undefined,
     summary: params.summary,
     modules: params.modules,
     files: params.files,

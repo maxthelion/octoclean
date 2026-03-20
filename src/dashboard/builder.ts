@@ -97,9 +97,13 @@ export function buildDashboard(snapshot: Snapshot): string {
     th { background:#f8fafc; font-size:.6875rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); text-align:left; padding:9px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
     td { padding:9px 14px; border-bottom:1px solid var(--border-light); vertical-align:middle; }
     tr:last-child td { border-bottom:none; }
-    tbody tr { cursor:pointer; transition:background .1s; }
-    tbody tr:hover { background:#f8fafc; }
-    tbody tr.active { background:#eff6ff; }
+    tbody tr { transition:background .1s; }
+    #filesBody tr { cursor:pointer; }
+    #filesBody tr:hover { background:#f8fafc; }
+    #filesBody tr.active { background:#eff6ff; }
+    .fn-table tbody tr:hover { background:#f8fafc; }
+    .fn-table a { color:inherit; text-decoration:none; }
+    .fn-table a:hover { text-decoration:underline; color:var(--blue); }
     .file-path { font-family:'SF Mono','Fira Code',monospace; font-size:.8125rem; }
     .score-num { font-weight:700; font-size:.9375rem; }
 
@@ -728,7 +732,9 @@ function renderPanelHeader(f) {
         '<div class="score-arc-num ' + scoreColourClass(f.health_score) + '">'+score+'</div>' +
       '</div>' +
       '<div class="score-arc-info">' +
-        '<div class="panel-file-path">'+esc(f.path)+'</div>' +
+        '<div class="panel-file-path">' + (SNAPSHOT.github_url
+          ? '<a href="'+SNAPSHOT.github_url+'/blob/'+SNAPSHOT.commit+'/'+esc(f.path)+'" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--border)">'+esc(f.path)+'</a>'
+          : esc(f.path)) + '</div>' +
         '<div class="panel-header-meta">' + pill(f.status) +
           '<span>'+f.module+'</span>' +
           (f.coverage != null ? '<span>Coverage: '+pct(f.coverage)+'</span>' : '') +
@@ -780,6 +786,9 @@ function renderPanelBody(f, assessments) {
   // Functions
   if (f.functions?.length) {
     const maxLoc = Math.max(...f.functions.map(fn => fn.loc), 1);
+    const githubBase = SNAPSHOT.github_url
+      ? SNAPSHOT.github_url + '/blob/' + SNAPSHOT.commit + '/' + f.path
+      : null;
     html += '<div class="panel-section"><div class="panel-section-title">Functions ('+f.functions.length+')</div>';
     html += '<table class="fn-table"><thead><tr><th>Name</th><th>Lines</th><th>LOC</th><th>Cycl.</th><th>Params</th><th>Issues</th></tr></thead><tbody>';
     f.functions.forEach(fn => {
@@ -787,9 +796,12 @@ function renderPanelBody(f, assessments) {
       const locCls  = fn.loc >= 60 ? 'fail' : fn.loc >= 25 ? 'warn' : '';
       const cyclCls = fn.cyclomatic >= 12 ? 'c-red' : fn.cyclomatic >= 7 ? 'c-amber' : '';
       const fnSmells = (fn.smells || []).filter(s => s.severity !== 'ok');
+      const lineRef = githubBase
+        ? '<a href="'+githubBase+'#L'+fn.line_start+'-L'+fn.line_end+'" target="_blank" rel="noopener">'+fn.line_start+'–'+fn.line_end+'</a>'
+        : fn.line_start+'–'+fn.line_end;
       html += '<tr>' +
         '<td><span class="fn-name">'+esc(fn.name)+'</span></td>' +
-        '<td style="color:var(--text-muted);font-size:.75rem">'+fn.line_start+'–'+fn.line_end+'</td>' +
+        '<td style="color:var(--text-muted);font-size:.75rem">'+lineRef+'</td>' +
         '<td><span class="fn-loc-bar-wrap"><span class="fn-loc-bar '+locCls+'" style="width:'+locPct.toFixed(0)+'%"></span></span>' +
           ' <span style="font-size:.75rem'+(locCls?';color:var(--'+(locCls==='fail'?'red':'amber')+')':'')+'">'+fn.loc+'</span></td>' +
         '<td class="'+cyclCls+'">'+fn.cyclomatic+'</td>' +

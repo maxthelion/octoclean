@@ -246,6 +246,7 @@ export interface Snapshot {
   commit: string;
   commit_message: string;
   repo: string;
+  github_url?: string;  // e.g. https://github.com/owner/repo — used for line links
   summary: SnapshotSummary;
   modules: ModuleMetrics[];
   files: FileMetrics[];

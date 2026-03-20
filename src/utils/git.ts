@@ -28,6 +28,24 @@ export function getRepoName(cwd: string): string {
   }
 }
 
+/**
+ * Extract the GitHub base URL from the origin remote, or null if not a GitHub remote.
+ * Handles both HTTPS (https://github.com/owner/repo.git) and
+ * SSH (git@github.com:owner/repo.git) formats.
+ */
+export function getGithubUrl(cwd: string): string | null {
+  try {
+    const remoteUrl = git(['remote', 'get-url', 'origin'], cwd).trim();
+    const https = remoteUrl.match(/https:\/\/github\.com\/(.+?)(?:\.git)?$/);
+    if (https) return `https://github.com/${https[1]}`;
+    const ssh = remoteUrl.match(/git@github\.com:(.+?)(?:\.git)?$/);
+    if (ssh) return `https://github.com/${ssh[1]}`;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function getCurrentCommit(cwd: string): string {
   return git(['rev-parse', 'HEAD'], cwd);
 }
