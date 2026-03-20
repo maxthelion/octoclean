@@ -537,15 +537,19 @@ async function loadTimeline() {
       return;
     }
 
-    // Use summary data from index (no need to fetch full snapshots)
-    const points = index.snapshots
-      .slice()
-      .reverse() // oldest first
-      .map(s => ({
-        date: new Date(s.timestamp),
-        score: s.summary.health_score,
-        label: s.summary.trend,
-      }));
+    // Sort by timestamp ascending, then deduplicate — keep only the latest
+    // snapshot per commit hash (removes duplicate scans of the same state)
+    const byCommit = new Map();
+    for (const s of index.snapshots) {
+      const existing = byCommit.get(s.commit);
+      if (!existing || new Date(s.timestamp) > new Date(existing.timestamp)) {
+        byCommit.set(s.commit, s);
+      }
+    }
+
+    const points = [...byCommit.values()]
+      .map(s => ({ date: new Date(s.timestamp), score: s.summary.health_score, commit: s.commit }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     loading.style.display = 'none';
     canvas.style.display  = 'block';

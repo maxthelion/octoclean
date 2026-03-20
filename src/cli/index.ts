@@ -11,6 +11,7 @@ import { serveDashboard } from '../dashboard/server.js';
 import { runDiff } from './diff.js';
 import { runAssessCommand } from './assess.js';
 import { runBackfill } from './backfill.js';
+import { runHistory } from './history.js';
 import type { ScanOptions, ReportOptions, AssessOptions, RemediateOptions, ServeOptions } from '../types/index.js';
 
 const program = new Command();
@@ -167,6 +168,44 @@ program
 
     try {
       await serveDashboard(options, cwd);
+    } catch (err) {
+      logger.error((err as Error).message);
+      process.exit(1);
+    }
+  });
+
+// ─── history ──────────────────────────────────────────────────────────────────
+
+program
+  .command('history <subcommand>')
+  .description('Inspect and manage snapshot history')
+  .argument('[target]', 'For remove: timestamp prefix or commit hash')
+  .addHelpText('after', `
+Subcommands:
+  list              Show all snapshots ordered by date
+  trim              Remove duplicate scans of the same commit (keep latest)
+  remove <target>   Remove snapshot by timestamp prefix or commit hash
+  clear             Wipe all snapshots and start fresh
+
+Examples:
+  codehealth history list
+  codehealth history trim
+  codehealth history remove 2026-03-20T09:29
+  codehealth history remove 1294174a
+  codehealth history clear`)
+  .action(async (subcommand, target) => {
+    const cwd = findProjectRoot();
+    const valid = ['list', 'trim', 'clear', 'remove'];
+    if (!valid.includes(subcommand)) {
+      logger.error(`Unknown subcommand '${subcommand}'. Use: ${valid.join(', ')}`);
+      process.exit(1);
+    }
+    if (subcommand === 'remove' && !target) {
+      logger.error('remove requires a timestamp prefix or commit hash');
+      process.exit(1);
+    }
+    try {
+      await runHistory({ subcommand, target }, cwd);
     } catch (err) {
       logger.error((err as Error).message);
       process.exit(1);
