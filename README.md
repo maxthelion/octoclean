@@ -9,7 +9,7 @@ octoclean tells you **what is wrong and where**. It does not try to fix anything
 ## Install globally
 
 ```bash
-npm install -g octoclean
+npm install -g github:maxthelion/octoclean
 ```
 
 Then install the analysis tools octoclean depends on:

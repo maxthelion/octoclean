@@ -111,7 +111,7 @@ jobs:
         run: pip install lizard
 
       - name: Install octoclean and analysis tools
-        run: npm install -g octoclean jscpd madge ts-unused-exports
+        run: npm install -g github:maxthelion/octoclean jscpd madge ts-unused-exports
 
       - name: Configure git identity
         run: |
