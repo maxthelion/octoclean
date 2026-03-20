@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeHealth — octoclean</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --surface: #fff;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+      --green: #16a34a;  --green-bg: #dcfce7;
+      --amber: #d97706;  --amber-bg: #fef9c3;
+      --red:   #dc2626;  --red-bg:   #fee2e2;
+      --blue:  #2563eb;
+      --panel-width: 560px;
+      --header-h: 52px;
+    }
+
+    body { font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:14px; line-height:1.5; }
+
+    /* ── Header ── */
+    header { position:sticky; top:0; z-index:10; height:var(--header-h); background:#0f172a; color:#f8fafc; display:flex; align-items:center; padding:0 20px; gap:16px; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+    header h1 { font-size:.9375rem; font-weight:600; white-space:nowrap; }
+    .header-meta { font-size:.75rem; color:#94a3b8; }
+    .status-bar { margin-left:auto; display:flex; gap:20px; font-size:.8125rem; align-items:center; }
+    .status-bar span { color:#94a3b8; }
+    .status-bar strong { color:#f8fafc; }
+    .status-attention { color:#f87171 !important; font-weight:700; }
+
+    /* ── Layout ── */
+    .layout { display:flex; min-height:calc(100vh - var(--header-h)); }
+    main { flex:1; min-width:0; padding:20px; transition:margin-right .25s ease; }
+    main.panel-open { margin-right:var(--panel-width); }
+
+    /* ── Cards ── */
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:16px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; }
+    .card-label { font-size:.6875rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); }
+    .card-value { font-size:2rem; font-weight:700; margin-top:2px; line-height:1.1; }
+    .card-sub   { font-size:.75rem; color:var(--text-muted); margin-top:3px; }
+
+    /* ── Tabs ── */
+    .tabs { display:flex; gap:2px; margin-bottom:16px; background:var(--border); border-radius:8px; padding:3px; width:fit-content; }
+    .tab { background:none; border:none; cursor:pointer; padding:6px 14px; border-radius:6px; font-size:.8125rem; font-weight:500; color:var(--text-muted); transition:all .15s; }
+    .tab:hover { color:var(--text); }
+    .tab.active { background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+    .tab-content { display:none; }
+    .tab-content.visible { display:block; }
+
+    /* ── Treemap ── */
+    .treemap-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; position:relative; }
+    #treemap-svg { display:block; width:100%; cursor:pointer; }
+    .treemap-node { transition:opacity .1s; }
+    .treemap-node:hover { opacity:.85; }
+    .treemap-label { pointer-events:none; dominant-baseline:middle; }
+
+    /* Tooltip */
+    .tooltip {
+      position:fixed; z-index:100; background:#0f172a; color:#f8fafc; border-radius:8px;
+      padding:10px 13px; font-size:.8125rem; max-width:280px; pointer-events:none;
+      opacity:0; transition:opacity .1s; line-height:1.5;
+      box-shadow:0 4px 20px rgba(0,0,0,.3);
+    }
+    .tooltip.visible { opacity:1; }
+    .tt-path  { font-family:monospace; font-size:.75rem; color:#94a3b8; margin-bottom:5px; word-break:break-all; }
+    .tt-score { font-size:1.5rem; font-weight:700; }
+    .tt-meta  { color:#94a3b8; font-size:.75rem; margin-top:3px; }
+    .tt-smells { margin-top:6px; border-top:1px solid #1e293b; padding-top:6px; font-size:.75rem; color:#cbd5e1; }
+
+    /* ── Timeline ── */
+    .timeline-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; }
+    .timeline-wrap h2 { font-size:.875rem; font-weight:600; margin-bottom:16px; }
+    #timeline-canvas { display:block; width:100%; }
+    .timeline-legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; font-size:.75rem; }
+    .legend-item { display:flex; align-items:center; gap:5px; }
+    .legend-dot { width:10px; height:10px; border-radius:50%; }
+    .timeline-loading { color:var(--text-muted); font-size:.875rem; padding:40px 0; text-align:center; }
+
+    /* ── Files table ── */
+    .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .table-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+    .table-header h2 { font-size:.875rem; font-weight:600; }
+    .table-header-meta { font-size:.75rem; color:var(--text-muted); }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#f8fafc; font-size:.6875rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); text-align:left; padding:9px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
+    td { padding:9px 14px; border-bottom:1px solid var(--border-light); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tbody tr { cursor:pointer; transition:background .1s; }
+    tbody tr:hover { background:#f8fafc; }
+    tbody tr.active { background:#eff6ff; }
+    .file-path { font-family:'SF Mono','Fira Code',monospace; font-size:.8125rem; }
+    .score-num { font-weight:700; font-size:.9375rem; }
+
+    /* ── Pills / tags ── */
+    .pill { display:inline-flex; align-items:center; padding:2px 7px; border-radius:9999px; font-size:.6875rem; font-weight:600; text-transform:uppercase; }
+    .pill-green { background:var(--green-bg); color:#15803d; }
+    .pill-amber { background:var(--amber-bg); color:#a16207; }
+    .pill-red   { background:var(--red-bg);   color:#b91c1c; }
+    .smells { display:flex; flex-wrap:wrap; gap:4px; }
+    .smell-tag { font-size:.625rem; padding:1px 6px; border-radius:4px; background:#f1f5f9; color:#475569; white-space:nowrap; }
+    .smell-tag.fail { background:var(--red-bg); color:#b91c1c; }
+    .smell-tag.warn { background:var(--amber-bg); color:#a16207; }
+
+    /* ── Detail panel ── */
+    .detail-panel { position:fixed; top:var(--header-h); right:0; width:var(--panel-width); height:calc(100vh - var(--header-h)); background:var(--surface); border-left:1px solid var(--border); overflow-y:auto; transform:translateX(100%); transition:transform .25s ease; z-index:20; display:flex; flex-direction:column; }
+    .detail-panel.open { transform:translateX(0); }
+    .panel-header { position:sticky; top:0; background:var(--surface); border-bottom:1px solid var(--border); padding:14px 18px; display:flex; align-items:flex-start; gap:10px; z-index:1; }
+    .panel-header-content { flex:1; min-width:0; }
+    .panel-file-path { font-family:'SF Mono','Fira Code',monospace; font-size:.8125rem; word-break:break-all; line-height:1.4; }
+    .panel-header-meta { font-size:.75rem; color:var(--text-muted); margin-top:4px; display:flex; gap:10px; flex-wrap:wrap; }
+    .panel-close { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1.25rem; line-height:1; padding:2px 4px; border-radius:4px; flex-shrink:0; }
+    .panel-close:hover { background:var(--border-light); color:var(--text); }
+    .panel-body { padding:16px 18px; flex:1; }
+    .panel-section { margin-bottom:20px; }
+    .panel-section-title { font-size:.6875rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:10px; font-weight:600; }
+    .metrics-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .metric-cell { background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:9px 12px; }
+    .metric-cell-label { font-size:.6875rem; color:var(--text-muted); }
+    .metric-cell-value { font-size:1.125rem; font-weight:700; margin-top:1px; }
+    .metric-cell-value.warn { color:var(--amber); }
+    .metric-cell-value.fail { color:var(--red); }
+    .smell-row { display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid var(--border-light); font-size:.8125rem; }
+    .smell-row:last-child { border-bottom:none; }
+    .smell-detail { color:var(--text-muted); font-size:.75rem; }
+    .fn-table { width:100%; border-collapse:collapse; font-size:.8125rem; }
+    .fn-table th { font-size:.625rem; background:none; padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text-muted); }
+    .fn-table td { padding:6px 8px; border-bottom:1px solid var(--border-light); }
+    .fn-table tr:last-child td { border-bottom:none; }
+    .fn-name { font-family:'SF Mono','Fira Code',monospace; font-size:.75rem; }
+    .fn-loc-bar-wrap { width:60px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; display:inline-block; vertical-align:middle; }
+    .fn-loc-bar { height:100%; border-radius:3px; background:var(--blue); }
+    .fn-loc-bar.warn { background:var(--amber); }
+    .fn-loc-bar.fail { background:var(--red); }
+    .assessment-card { border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:8px; }
+    .assessment-card.fail { border-color:#fca5a5; background:#fff8f8; }
+    .assessment-card.warn { border-color:#fde68a; background:#fffdf0; }
+    .assessment-card.ok   { border-color:#bbf7d0; background:#f0fff4; }
+    .assessment-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .assessment-type { font-size:.75rem; font-weight:600; text-transform:capitalize; }
+    .assessment-conf { font-size:.6875rem; color:var(--text-muted); margin-left:auto; }
+    .assessment-detail { font-size:.8125rem; color:var(--text-muted); line-height:1.5; }
+    .assessment-lines { font-size:.6875rem; color:var(--blue); margin-top:5px; font-family:monospace; }
+    .score-arc-wrap { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+    .score-arc { position:relative; width:72px; height:72px; flex-shrink:0; }
+    .score-arc svg { transform:rotate(-90deg); }
+    .score-arc-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:700; }
+    .empty { padding:32px 0; text-align:center; color:var(--text-muted); font-size:.875rem; }
+    .c-green { color:var(--green); } .c-amber { color:var(--amber); } .c-red { color:var(--red); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>CodeHealth · octoclean</h1>
+  <span class="header-meta" id="headerMeta"></span>
+  <div class="status-bar" id="statusBar"></div>
+</header>
+
+<div class="layout">
+  <main id="main">
+    <div class="cards" id="cards"></div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="treemap">Treemap</button>
+      <button class="tab"        data-tab="files">Files</button>
+      <button class="tab"        data-tab="timeline">Timeline</button>
+    </div>
+
+    <!-- Treemap -->
+    <div id="tab-treemap" class="tab-content visible">
+      <div class="treemap-wrap">
+        <svg id="treemap-svg"></svg>
+      </div>
+    </div>
+
+    <!-- Files -->
+    <div id="tab-files" class="tab-content">
+      <div class="table-wrap">
+        <div class="table-header">
+          <h2>Files <span id="fileCount" style="color:var(--text-muted);font-weight:400"></span></h2>
+          <span class="table-header-meta">Sorted by health score · click a row to inspect</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>File</th><th>Health</th><th>Status</th><th>LOC</th><th>Cyclomatic</th><th>Churn 30d</th><th>Issues</th>
+          </tr></thead>
+          <tbody id="filesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div id="tab-timeline" class="tab-content">
+      <div class="timeline-wrap">
+        <h2>Health Score Over Time</h2>
+        <div id="timeline-loading" class="timeline-loading">Loading history…</div>
+        <canvas id="timeline-canvas" height="320" style="display:none"></canvas>
+        <div class="timeline-legend" id="timeline-legend"></div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="detail-panel" id="detailPanel">
+    <div id="panelHeader"></div>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const SNAPSHOT = {"schema_version":1,"generated_at":"2026-03-20T12:04:59.146Z","commit":"a4ccf4f4","commit_message":"feat: codehealth init generates GitHub Actions workflow","repo":"octoclean","summary":{"health_score":0.6,"trend":"stable","trend_delta":-0.01,"coverage":null,"total_loc":5098,"files_analysed":37,"red_files":22,"amber_files":4,"green_files":11},"modules":[{"name":"Application","path":"src/","health_score":0.6,"status":"amber","trend":"stable","trend_delta":-0.01,"plain_summary":null,"signals":{"loc":5098,"coverage":null,"cyclomatic_p50":15,"cyclomatic_p95":52,"cognitive_p95":68,"duplication_ratio":0,"churn_30d":62,"dead_exports":0,"coupling_fan_out_avg":2.86}}],"files":[{"path":"src/assessor/file-assessor.ts","module":"Application","health_score":0.39,"status":"red","loc":205,"coverage":null,"cyclomatic":29,"cognitive":38,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":6},"smells":[{"type":"high_complexity","severity":"warn","detail":"205 lines, threshold 500"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 29, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 38, threshold 20"}],"functions":[{"name":"assessFile","line_start":32,"line_end":55,"loc":24,"cyclomatic":4,"cognitive":5,"parameter_count":5,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"fail","detail":"5 parameters, threshold 5"}]},{"name":"assessFunction","line_start":66,"line_end":102,"loc":37,"cyclomatic":5,"cognitive":7,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"37 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"detectCompetingImplementations","line_start":113,"line_end":143,"loc":31,"cyclomatic":8,"cognitive":10,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"31 lines, threshold 60"},{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 8, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 10, threshold 20"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"parseSeverity","line_start":168,"line_end":172,"loc":5,"cyclomatic":4,"cognitive":5,"parameter_count":1,"coverage":null,"smells":[]},{"name":"runAssessment","line_start":175,"line_end":201,"loc":27,"cyclomatic":5,"cognitive":7,"parameter_count":6,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"27 lines, threshold 60"},{"type":"too_many_parameters","severity":"fail","detail":"6 parameters, threshold 5"}]},{"name":"clamp","line_start":285,"line_end":288,"loc":4,"cyclomatic":3,"cognitive":4,"parameter_count":1,"coverage":null,"smells":[]}]},{"path":"src/assessor/index.ts","module":"Application","health_score":0.48,"status":"red","loc":102,"coverage":null,"cyclomatic":13,"cognitive":17,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":5},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 13, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 17, threshold 20"}],"functions":[{"name":"buildEmptyAssessments","line_start":49,"line_end":70,"loc":22,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"&gt;","line_start":110,"line_end":110,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"&gt;","line_start":110,"line_end":110,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"execute","line_start":112,"line_end":118,"loc":7,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"Promise","line_start":111,"line_end":118,"loc":8,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]}]},{"path":"src/assessor/prompts/competing-implementation.ts","module":"Application","health_score":1,"status":"green","loc":39,"coverage":null,"cyclomatic":1,"cognitive":1,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":0},"smells":[],"functions":[{"name":"buildPrompt","line_start":5,"line_end":41,"loc":37,"cyclomatic":1,"cognitive":1,"parameter_count":4,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"37 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"4 parameters, threshold 5"}]}]},{"path":"src/assessor/prompts/docstring-faithfulness.ts","module":"Application","health_score":1,"status":"green","loc":39,"coverage":null,"cyclomatic":1,"cognitive":1,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":0},"smells":[],"functions":[{"name":"buildPrompt","line_start":7,"line_end":41,"loc":35,"cyclomatic":1,"cognitive":1,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"35 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]}]},{"path":"src/assessor/prompts/intent-clarity.ts","module":"Application","health_score":1,"status":"green","loc":31,"coverage":null,"cyclomatic":1,"cognitive":1,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":0},"smells":[],"functions":[{"name":"buildPrompt","line_start":5,"line_end":33,"loc":29,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"29 lines, threshold 60"}]}]},{"path":"src/assessor/prompts/naming-coherence.ts","module":"Application","health_score":1,"status":"green","loc":31,"coverage":null,"cyclomatic":1,"cognitive":1,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":0},"smells":[],"functions":[{"name":"buildPrompt","line_start":5,"line_end":33,"loc":29,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"29 lines, threshold 60"}]}]},{"path":"src/assessor/selector.ts","module":"Application","health_score":0.81,"status":"green","loc":34,"coverage":null,"cyclomatic":9,"cognitive":12,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":1},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 9, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 12, threshold 20"}],"functions":[{"name":"computePriority","line_start":36,"line_end":37,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]}]},{"path":"src/assessor/synthesis.ts","module":"Application","health_score":0.81,"status":"green","loc":65,"coverage":null,"cyclomatic":9,"cognitive":12,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":2},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 9, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 12, threshold 20"}],"functions":[{"name":"synthesiseModuleSummaries","line_start":19,"line_end":32,"loc":14,"cyclomatic":2,"cognitive":3,"parameter_count":4,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"4 parameters, threshold 5"}]},{"name":"generateModuleSummary","line_start":39,"line_end":62,"loc":24,"cyclomatic":1,"cognitive":1,"parameter_count":4,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"4 parameters, threshold 5"}]}]},{"path":"src/cli/backfill.ts","module":"Application","health_score":0.4,"status":"red","loc":142,"coverage":null,"cyclomatic":20,"cognitive":26,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":7},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 20, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 26, threshold 20"},{"type":"high_fan_out","severity":"warn","detail":"Fan-out 7, threshold 12"}],"functions":[{"name":"removeWorktree","line_start":129,"line_end":131,"loc":3,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]},{"name":"getCommitCandidates","line_start":145,"line_end":155,"loc":11,"cyclomatic":4,"cognitive":5,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"onePerDay","line_start":180,"line_end":203,"loc":24,"cyclomatic":8,"cognitive":10,"parameter_count":4,"coverage":null,"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 8, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 10, threshold 20"},{"type":"too_many_parameters","severity":"warn","detail":"4 parameters, threshold 5"}]}]},{"path":"src/cli/diff.ts","module":"Application","health_score":0.39,"status":"red","loc":91,"coverage":null,"cyclomatic":44,"cognitive":57,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":3},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 44, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 57, threshold 20"}],"functions":[{"name":"runDiff","line_start":5,"line_end":11,"loc":7,"cyclomatic":3,"cognitive":4,"parameter_count":2,"coverage":null,"smells":[]},{"name":"scoreDelta","line_start":35,"line_end":35,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]},{"name":"printSectionHeader","line_start":51,"line_end":104,"loc":54,"cyclomatic":19,"cognitive":25,"parameter_count":7,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"54 lines, threshold 60"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 19, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 25, threshold 20"},{"type":"too_many_parameters","severity":"fail","detail":"7 parameters, threshold 5"}]}]},{"path":"src/cli/export.ts","module":"Application","health_score":0.39,"status":"red","loc":222,"coverage":null,"cyclomatic":39,"cognitive":51,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":4},"smells":[{"type":"high_complexity","severity":"warn","detail":"222 lines, threshold 500"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 39, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 51, threshold 20"}],"functions":[{"name":"runExport","line_start":19,"line_end":27,"loc":9,"cyclomatic":2,"cognitive":3,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"exportAutoresearch","line_start":31,"line_end":70,"loc":40,"cyclomatic":4,"cognitive":5,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"40 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"permittedActionsForFile","line_start":162,"line_end":174,"loc":13,"cyclomatic":11,"cognitive":14,"parameter_count":1,"coverage":null,"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 11, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 14, threshold 20"}]}]},{"path":"src/cli/history.ts","module":"Application","health_score":0.4,"status":"red","loc":103,"coverage":null,"cyclomatic":29,"cognitive":38,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":5},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 29, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 38, threshold 20"}],"functions":[{"name":"runHistory","line_start":24,"line_end":31,"loc":8,"cyclomatic":5,"cognitive":7,"parameter_count":2,"coverage":null,"smells":[]},{"name":"listSnapshots","line_start":35,"line_end":62,"loc":28,"cyclomatic":4,"cognitive":5,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"28 lines, threshold 60"}]},{"name":"trimSnapshots","line_start":82,"line_end":109,"loc":28,"cyclomatic":9,"cognitive":12,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"28 lines, threshold 60"},{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 9, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 12, threshold 20"}]},{"name":"removeSnapshot","line_start":124,"line_end":144,"loc":21,"cyclomatic":7,"cognitive":9,"parameter_count":2,"coverage":null,"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 7, threshold 12"}]}]},{"path":"src/cli/index.ts","module":"Application","health_score":0.35,"status":"red","loc":244,"coverage":null,"cyclomatic":49,"cognitive":64,"duplication_ratio":0,"churn_30d":6,"dead_exports":0,"coupling":{"fan_in":0,"fan_out":12},"smells":[{"type":"high_complexity","severity":"warn","detail":"244 lines, threshold 500"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 49, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 64, threshold 20"},{"type":"high_fan_out","severity":"fail","detail":"Fan-out 12, threshold 12"}],"functions":[]},{"path":"src/cli/init.ts","module":"Application","health_score":0.71,"status":"amber","loc":107,"coverage":null,"cyclomatic":10,"cognitive":13,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":4},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 10, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 13, threshold 20"}],"functions":[{"name":"runInit","line_start":10,"line_end":54,"loc":45,"cyclomatic":5,"cognitive":7,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"45 lines, threshold 60"}]},{"name":"buildWorkflow","line_start":70,"line_end":124,"loc":55,"cyclomatic":4,"cognitive":5,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"55 lines, threshold 60"}]}]},{"path":"src/cli/pages.ts","module":"Application","health_score":0.47,"status":"red","loc":93,"coverage":null,"cyclomatic":13,"cognitive":17,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":2,"fan_out":5},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 13, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 17, threshold 20"}],"functions":[{"name":"runPages","line_start":24,"line_end":58,"loc":35,"cyclomatic":5,"cognitive":7,"parameter_count":2,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"35 lines, threshold 60"}]},{"name":"enableGitHubPages","line_start":67,"line_end":110,"loc":44,"cyclomatic":7,"cognitive":9,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"44 lines, threshold 60"},{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 7, threshold 12"}]},{"name":"ghAvailable","line_start":127,"line_end":130,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]}]},{"path":"src/cli/report.ts","module":"Application","health_score":0.39,"status":"red","loc":183,"coverage":null,"cyclomatic":52,"cognitive":68,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":3},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 52, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 68, threshold 20"}],"functions":[{"name":"runReport","line_start":5,"line_end":15,"loc":11,"cyclomatic":5,"cognitive":7,"parameter_count":2,"coverage":null,"smells":[]},{"name":"files","line_start":157,"line_end":157,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"trendArrow","line_start":20,"line_end":133,"loc":114,"cyclomatic":27,"cognitive":35,"parameter_count":9,"coverage":null,"smells":[{"type":"giant_function","severity":"fail","detail":"114 lines, threshold 60"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 27, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 35, threshold 20"},{"type":"too_many_parameters","severity":"fail","detail":"9 parameters, threshold 5"}]},{"name":"markdownSummaryTable","line_start":164,"line_end":210,"loc":47,"cyclomatic":4,"cognitive":5,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"47 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]}]},{"path":"src/cli/scan.ts","module":"Application","health_score":0.38,"status":"red","loc":107,"coverage":null,"cyclomatic":18,"cognitive":23,"duplication_ratio":0,"churn_30d":4,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":9},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 18, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 23, threshold 20"},{"type":"high_fan_out","severity":"warn","detail":"Fan-out 9, threshold 12"}],"functions":[{"name":"runScanCommand","line_start":12,"line_end":85,"loc":74,"cyclomatic":8,"cognitive":10,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"fail","detail":"74 lines, threshold 60"},{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 8, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 10, threshold 20"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"printScanSummary","line_start":109,"line_end":131,"loc":23,"cyclomatic":8,"cognitive":10,"parameter_count":1,"coverage":null,"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 8, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 10, threshold 20"}]}]},{"path":"src/config/defaults.ts","module":"Application","health_score":1,"status":"green","loc":157,"coverage":null,"cyclomatic":0,"cognitive":0,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":4,"fan_out":1},"smells":[],"functions":[]},{"path":"src/config/index.test.ts","module":"Application","health_score":1,"status":"green","loc":90,"coverage":null,"cyclomatic":7,"cognitive":9,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":0,"fan_out":2},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 7, threshold 12"}],"functions":[]},{"path":"src/config/index.ts","module":"Application","health_score":1,"status":"green","loc":104,"coverage":null,"cyclomatic":5,"cognitive":7,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":3,"fan_out":2},"smells":[],"functions":[{"name":"findConfigFile","line_start":104,"line_end":114,"loc":11,"cyclomatic":4,"cognitive":5,"parameter_count":1,"coverage":null,"smells":[]}]},{"path":"src/dashboard/builder.ts","module":"Application","health_score":0.86,"status":"green","loc":827,"coverage":null,"cyclomatic":1,"cognitive":1,"duplication_ratio":0,"churn_30d":5,"dead_exports":0,"coupling":{"fan_in":2,"fan_out":1},"smells":[{"type":"high_complexity","severity":"fail","detail":"827 lines, threshold 500"}],"functions":[{"name":"buildDashboard","line_start":3,"line_end":828,"loc":826,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"fail","detail":"826 lines, threshold 60"}]}]},{"path":"src/dashboard/server.ts","module":"Application","health_score":0.39,"status":"red","loc":63,"coverage":null,"cyclomatic":17,"cognitive":22,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":5},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 17, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 22, threshold 20"}],"functions":[{"name":"serveDashboard","line_start":12,"line_end":20,"loc":9,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]},{"name":"noSnapshotHtml","line_start":73,"line_end":80,"loc":8,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]}]},{"path":"src/metrics/branch.ts","module":"Application","health_score":0.4,"status":"red","loc":150,"coverage":null,"cyclomatic":18,"cognitive":23,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":7,"fan_out":2},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 18, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 23, threshold 20"}],"functions":[{"name":"ensureMetricsBranch","line_start":22,"line_end":51,"loc":30,"cyclomatic":3,"cognitive":4,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"30 lines, threshold 60"}]},{"name":"readFromMetricsBranch","line_start":63,"line_end":73,"loc":11,"cyclomatic":3,"cognitive":4,"parameter_count":2,"coverage":null,"smells":[]},{"name":"writeToMetricsBranch","line_start":82,"line_end":96,"loc":15,"cyclomatic":2,"cognitive":3,"parameter_count":4,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"4 parameters, threshold 5"}]},{"name":"writeMultipleToMetricsBranch","line_start":100,"line_end":123,"loc":24,"cyclomatic":4,"cognitive":5,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"pushMetricsBranch","line_start":134,"line_end":198,"loc":65,"cyclomatic":5,"cognitive":7,"parameter_count":8,"coverage":null,"smells":[{"type":"giant_function","severity":"fail","detail":"65 lines, threshold 60"},{"type":"too_many_parameters","severity":"fail","detail":"8 parameters, threshold 5"}]}]},{"path":"src/metrics/index.ts","module":"Application","health_score":0.4,"status":"red","loc":129,"coverage":null,"cyclomatic":24,"cognitive":31,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":8,"fan_out":4},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 24, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 31, threshold 20"}],"functions":[{"name":"buildSnapshot","line_start":27,"line_end":50,"loc":24,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"saveSnapshot","line_start":53,"line_end":86,"loc":34,"cyclomatic":4,"cognitive":5,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"34 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"loadLatestSnapshot","line_start":99,"line_end":104,"loc":6,"cyclomatic":3,"cognitive":4,"parameter_count":1,"coverage":null,"smells":[]},{"name":"loadSnapshot","line_start":106,"line_end":115,"loc":10,"cyclomatic":3,"cognitive":4,"parameter_count":2,"coverage":null,"smells":[]},{"name":"loadSnapshotByDate","line_start":118,"line_end":126,"loc":9,"cyclomatic":3,"cognitive":4,"parameter_count":2,"coverage":null,"smells":[]},{"name":"loadIndex","line_start":134,"line_end":151,"loc":18,"cyclomatic":3,"cognitive":4,"parameter_count":1,"coverage":null,"smells":[]},{"name":"resolveSnapshotRef","line_start":156,"line_end":166,"loc":11,"cyclomatic":5,"cognitive":7,"parameter_count":2,"coverage":null,"smells":[]}]},{"path":"src/scanner/coverage.ts","module":"Application","health_score":0.72,"status":"amber","loc":77,"coverage":null,"cyclomatic":10,"cognitive":13,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":1},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 10, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 13, threshold 20"}],"functions":[{"name":"runCoverage","line_start":41,"line_end":65,"loc":25,"cyclomatic":4,"cognitive":5,"parameter_count":2,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"25 lines, threshold 60"}]},{"name":"readExistingCoverage","line_start":76,"line_end":106,"loc":31,"cyclomatic":6,"cognitive":8,"parameter_count":2,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"31 lines, threshold 60"}]}]},{"path":"src/scanner/index.ts","module":"Application","health_score":0.33,"status":"red","loc":335,"coverage":null,"cyclomatic":128,"cognitive":166,"duplication_ratio":0,"churn_30d":3,"dead_exports":0,"coupling":{"fan_in":2,"fan_out":9},"smells":[{"type":"high_complexity","severity":"warn","detail":"335 lines, threshold 500"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 128, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 166, threshold 20"},{"type":"high_fan_out","severity":"warn","detail":"Fan-out 9, threshold 12"}],"functions":[{"name":"runScan","line_start":54,"line_end":57,"loc":4,"cyclomatic":2,"cognitive":3,"parameter_count":1,"coverage":null,"smells":[]},{"name":"runQuickScan","line_start":63,"line_end":101,"loc":39,"cyclomatic":28,"cognitive":36,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"39 lines, threshold 60"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 28, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 36, threshold 20"}]},{"name":"getChangedFilesSinceLastSnapshot","line_start":131,"line_end":228,"loc":98,"cyclomatic":44,"cognitive":57,"parameter_count":2,"coverage":null,"smells":[{"type":"giant_function","severity":"fail","detail":"98 lines, threshold 60"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 44, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 57, threshold 20"}]},{"name":"discoverFiles","line_start":295,"line_end":301,"loc":7,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]},{"name":"resolveModule","line_start":304,"line_end":321,"loc":18,"cyclomatic":6,"cognitive":8,"parameter_count":2,"coverage":null,"smells":[]},{"name":"value","line_start":339,"line_end":339,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":340,"line_end":340,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":341,"line_end":341,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"detail","line_start":342,"line_end":342,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"value","line_start":348,"line_end":349,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":349,"line_end":350,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":350,"line_end":351,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"SMELL_RULES","line_start":351,"line_end":352,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"value","line_start":355,"line_end":356,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":356,"line_end":357,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":357,"line_end":358,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"SMELL_RULES","line_start":358,"line_end":359,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"value","line_start":362,"line_end":363,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":363,"line_end":364,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":364,"line_end":365,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"SMELL_RULES","line_start":365,"line_end":366,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"value","line_start":369,"line_end":370,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":370,"line_end":371,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":371,"line_end":372,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"SMELL_RULES","line_start":372,"line_end":373,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"value","line_start":376,"line_end":377,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":377,"line_end":378,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":378,"line_end":379,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"SMELL_RULES","line_start":379,"line_end":380,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"value","line_start":383,"line_end":384,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":384,"line_end":385,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"fail","line_start":385,"line_end":386,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"SMELL_RULES","line_start":386,"line_end":387,"loc":2,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"evaluateRule","line_start":390,"line_end":393,"loc":4,"cyclomatic":2,"cognitive":3,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"buildFileSmells","line_start":398,"line_end":421,"loc":24,"cyclomatic":7,"cognitive":9,"parameter_count":2,"coverage":null,"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 7, threshold 12"}]}]},{"path":"src/scanner/jscpd.ts","module":"Application","health_score":0.4,"status":"red","loc":104,"coverage":null,"cyclomatic":15,"cognitive":20,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":1},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 15, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 20, threshold 20"}],"functions":[{"name":"runJscpd","line_start":53,"line_end":108,"loc":56,"cyclomatic":11,"cognitive":14,"parameter_count":6,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"56 lines, threshold 60"},{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 11, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 14, threshold 20"},{"type":"too_many_parameters","severity":"fail","detail":"6 parameters, threshold 5"}]},{"name":"refineDuplicationRatios","line_start":132,"line_end":147,"loc":16,"cyclomatic":4,"cognitive":5,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]}]},{"path":"src/scanner/lizard.ts","module":"Application","health_score":0.38,"status":"red","loc":216,"coverage":null,"cyclomatic":18,"cognitive":23,"duplication_ratio":0,"churn_30d":2,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":2},"smells":[{"type":"high_complexity","severity":"warn","detail":"216 lines, threshold 500"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 18, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 23, threshold 20"}],"functions":[{"name":"runLizard","line_start":54,"line_end":95,"loc":42,"cyclomatic":6,"cognitive":8,"parameter_count":3,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"42 lines, threshold 60"},{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"estimateCognitive","line_start":259,"line_end":262,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"getFunctionSmells","line_start":265,"line_end":288,"loc":24,"cyclomatic":9,"cognitive":12,"parameter_count":2,"coverage":null,"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 9, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 12, threshold 20"}]}]},{"path":"src/scanner/madge.ts","module":"Application","health_score":0.4,"status":"red","loc":81,"coverage":null,"cyclomatic":27,"cognitive":35,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":2},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 27, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 35, threshold 20"}],"functions":[{"name":"runMadge","line_start":27,"line_end":46,"loc":20,"cyclomatic":5,"cognitive":7,"parameter_count":2,"coverage":null,"smells":[]},{"name":"buildCouplingMetrics","line_start":55,"line_end":76,"loc":22,"cyclomatic":13,"cognitive":17,"parameter_count":1,"coverage":null,"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 13, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 17, threshold 20"}]},{"name":"dfs","line_start":102,"line_end":108,"loc":7,"cyclomatic":3,"cognitive":4,"parameter_count":2,"coverage":null,"smells":[]},{"name":"findCircularDeps","line_start":97,"line_end":114,"loc":18,"cyclomatic":6,"cognitive":8,"parameter_count":1,"coverage":null,"smells":[]}]},{"path":"src/scanner/unused-exports.ts","module":"Application","health_score":0.62,"status":"amber","loc":58,"coverage":null,"cyclomatic":11,"cognitive":14,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":1,"fan_out":1},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 11, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 14, threshold 20"}],"functions":[{"name":"runUnusedExports","line_start":31,"line_end":58,"loc":28,"cyclomatic":8,"cognitive":10,"parameter_count":1,"coverage":null,"smells":[{"type":"giant_function","severity":"warn","detail":"28 lines, threshold 60"},{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 8, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 10, threshold 20"}]},{"name":"parseUnusedExports","line_start":69,"line_end":82,"loc":14,"cyclomatic":2,"cognitive":3,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]}]},{"path":"src/scanner/versioned-symbols.test.ts","module":"Application","health_score":0.72,"status":"amber","loc":45,"coverage":null,"cyclomatic":10,"cognitive":13,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":0,"fan_out":1},"smells":[{"type":"high_complexity","severity":"warn","detail":"Cyclomatic complexity 10, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 13, threshold 20"}],"functions":[]},{"path":"src/scanner/versioned-symbols.ts","module":"Application","health_score":0.48,"status":"red","loc":68,"coverage":null,"cyclomatic":13,"cognitive":17,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":2,"fan_out":2},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 13, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 17, threshold 20"}],"functions":[{"name":"detectVersionedSymbols","line_start":21,"line_end":82,"loc":62,"cyclomatic":13,"cognitive":17,"parameter_count":6,"coverage":null,"smells":[{"type":"giant_function","severity":"fail","detail":"62 lines, threshold 60"},{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 13, threshold 12"},{"type":"high_cognitive_complexity","severity":"warn","detail":"Cognitive complexity 17, threshold 20"},{"type":"too_many_parameters","severity":"fail","detail":"6 parameters, threshold 5"}]}]},{"path":"src/scorer/index.test.ts","module":"Application","health_score":0.4,"status":"red","loc":126,"coverage":null,"cyclomatic":19,"cognitive":25,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":0,"fan_out":3},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 19, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 25, threshold 20"}],"functions":[{"name":"makeFile","line_start":6,"line_end":22,"loc":17,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]}]},{"path":"src/scorer/index.ts","module":"Application","health_score":0.4,"status":"red","loc":188,"coverage":null,"cyclomatic":35,"cognitive":46,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":3,"fan_out":1},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 35, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 46, threshold 20"}],"functions":[{"name":"getWeights","line_start":38,"line_end":51,"loc":14,"cyclomatic":2,"cognitive":3,"parameter_count":1,"coverage":null,"smells":[]},{"name":"scoreToStatus","line_start":118,"line_end":121,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"scoreFiles","line_start":125,"line_end":128,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]},{"name":"files.reduce","line_start":183,"line_end":183,"loc":1,"cyclomatic":1,"cognitive":1,"parameter_count":0,"coverage":null,"smells":[]},{"name":"files.reduce","line_start":183,"line_end":192,"loc":10,"cyclomatic":2,"cognitive":3,"parameter_count":2,"coverage":null,"smells":[]},{"name":"mean","line_start":214,"line_end":220,"loc":7,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"linearPenalty","line_start":229,"line_end":234,"loc":6,"cyclomatic":3,"cognitive":4,"parameter_count":4,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"4 parameters, threshold 5"}]},{"name":"scoreToStatus","line_start":235,"line_end":240,"loc":6,"cyclomatic":3,"cognitive":4,"parameter_count":1,"coverage":null,"smells":[]},{"name":"deltaToTrend","line_start":241,"line_end":257,"loc":17,"cyclomatic":5,"cognitive":7,"parameter_count":2,"coverage":null,"smells":[]}]},{"path":"src/types/index.ts","module":"Application","health_score":0.98,"status":"green","loc":251,"coverage":null,"cyclomatic":0,"cognitive":0,"duplication_ratio":0,"churn_30d":3,"dead_exports":0,"coupling":{"fan_in":22,"fan_out":0},"smells":[{"type":"high_complexity","severity":"warn","detail":"251 lines, threshold 500"}],"functions":[]},{"path":"src/utils/git.ts","module":"Application","health_score":0.4,"status":"red","loc":153,"coverage":null,"cyclomatic":33,"cognitive":43,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":9,"fan_out":0},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 33, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 43, threshold 20"}],"functions":[{"name":"git","line_start":6,"line_end":17,"loc":12,"cyclomatic":2,"cognitive":3,"parameter_count":2,"coverage":null,"smells":[]},{"name":"getRepoName","line_start":22,"line_end":29,"loc":8,"cyclomatic":2,"cognitive":3,"parameter_count":1,"coverage":null,"smells":[]},{"name":"getCurrentCommit","line_start":31,"line_end":34,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"getCurrentCommitShort","line_start":35,"line_end":38,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"getCommitMessage","line_start":39,"line_end":42,"loc":4,"cyclomatic":1,"cognitive":1,"parameter_count":2,"coverage":null,"smells":[]},{"name":"hasRemote","line_start":43,"line_end":52,"loc":10,"cyclomatic":2,"cognitive":3,"parameter_count":1,"coverage":null,"smells":[]},{"name":"getMergeCommits","line_start":64,"line_end":71,"loc":8,"cyclomatic":1,"cognitive":1,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"getWeeklyCommits","line_start":76,"line_end":85,"loc":10,"cyclomatic":1,"cognitive":1,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"getEveryCommit","line_start":97,"line_end":104,"loc":8,"cyclomatic":1,"cognitive":1,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"getCommitsSince","line_start":108,"line_end":115,"loc":8,"cyclomatic":1,"cognitive":1,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"getChangedFiles","line_start":121,"line_end":128,"loc":8,"cyclomatic":2,"cognitive":3,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"getChurn","line_start":132,"line_end":142,"loc":11,"cyclomatic":2,"cognitive":3,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"getCoChangedFiles","line_start":147,"line_end":169,"loc":23,"cyclomatic":5,"cognitive":7,"parameter_count":3,"coverage":null,"smells":[{"type":"too_many_parameters","severity":"warn","detail":"3 parameters, threshold 5"}]},{"name":"metricsBranchExists","line_start":184,"line_end":192,"loc":9,"cyclomatic":2,"cognitive":3,"parameter_count":1,"coverage":null,"smells":[]},{"name":"ensureMetricsBranch","line_start":196,"line_end":210,"loc":15,"cyclomatic":3,"cognitive":4,"parameter_count":1,"coverage":null,"smells":[]},{"name":"weekKey","line_start":226,"line_end":232,"loc":7,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]}]},{"path":"src/utils/logger.ts","module":"Application","health_score":0.4,"status":"red","loc":38,"coverage":null,"cyclomatic":15,"cognitive":20,"duplication_ratio":0,"churn_30d":1,"dead_exports":0,"coupling":{"fan_in":21,"fan_out":0},"smells":[{"type":"high_complexity","severity":"fail","detail":"Cyclomatic complexity 15, threshold 12"},{"type":"high_cognitive_complexity","severity":"fail","detail":"Cognitive complexity 20, threshold 20"}],"functions":[{"name":"setLogLevel","line_start":14,"line_end":20,"loc":7,"cyclomatic":1,"cognitive":1,"parameter_count":1,"coverage":null,"smells":[]},{"name":"debug","line_start":23,"line_end":25,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"info","line_start":26,"line_end":28,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"warn","line_start":29,"line_end":31,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"error","line_start":32,"line_end":34,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"success","line_start":35,"line_end":37,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"step","line_start":38,"line_end":40,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]},{"name":"dim","line_start":41,"line_end":43,"loc":3,"cyclomatic":2,"cognitive":3,"parameter_count":0,"coverage":null,"smells":[]}]}],"drift_signals":{"versioned_symbols":[],"dead_export_growth":null},"agent_assessments":{"generated_at":"2026-03-20T12:04:59.124Z","model":"claude-haiku-4-5","prompt_version":"1.0.0","files":[]}};
+
+// ── Colour helpers ────────────────────────────────────────────────────────────
+
+function lerpRGB(a, b, t) {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ];
+}
+
+function healthColour(score) {
+  const RED   = [220, 38,  38];
+  const AMBER = [217, 119,  6];
+  const GREEN = [ 22, 163, 74];
+  let rgb;
+  if      (score < 0.5)  rgb = lerpRGB(RED,   AMBER, score / 0.5);
+  else if (score < 0.75) rgb = lerpRGB(AMBER,  GREEN, (score - 0.5) / 0.25);
+  else                   rgb = GREEN;
+  return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+}
+
+function scoreColourClass(s) { return s >= 0.75 ? 'c-green' : s >= 0.5 ? 'c-amber' : 'c-red'; }
+function pill(s) { return '<span class="pill pill-' + s + '">' + s + '</span>'; }
+function trendArrow(t) { return t==='improving'?'↑':t==='degrading'?'↓':'→'; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function pct(n) { return n != null ? Math.round(n * 100) + '%' : '—'; }
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+const s = SNAPSHOT.summary;
+document.getElementById('headerMeta').textContent =
+  'Commit ' + SNAPSHOT.commit + ' · ' + new Date(SNAPSHOT.generated_at).toLocaleString();
+
+const attn = (SNAPSHOT.files || []).filter(f => f.status === 'red').length;
+document.getElementById('statusBar').innerHTML =
+  '<span>Trajectory: <strong>' + trendArrow(s.trend) + ' ' + s.trend + '</strong></span>' +
+  (attn > 0 ? '<span>Needs attention: <strong class="status-attention">' + attn + '</strong></span>' : '');
+
+// ── Summary cards ─────────────────────────────────────────────────────────────
+
+document.getElementById('cards').innerHTML = [
+  { label:'Health Score', value: Math.round(s.health_score*100), cls: scoreColourClass(s.health_score),
+    sub: trendArrow(s.trend)+' '+s.trend+' ('+(s.trend_delta>=0?'+':'')+Math.round(s.trend_delta*100)+'pts)' },
+  { label:'Files', value: s.files_analysed, cls:'',
+    sub: s.green_files+' green · '+s.amber_files+' amber · '+s.red_files+' red' },
+  { label:'Total LOC', value: s.total_loc.toLocaleString(), cls:'', sub:'' },
+  ...(s.coverage != null ? [{ label:'Coverage', value: pct(s.coverage), cls: scoreColourClass(s.coverage), sub:'' }] : []),
+].map(c =>
+  '<div class="card"><div class="card-label">'+c.label+'</div>' +
+  '<div class="card-value '+c.cls+'">'+c.value+'</div>' +
+  '<div class="card-sub">'+c.sub+'</div></div>'
+).join('');
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+
+document.getElementById('tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.tab');
+  if (!btn) return;
+  const tabName = btn.dataset.tab;
+
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('visible'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tabName).classList.add('visible');
+
+  if (tabName === 'treemap') renderTreemap();
+  if (tabName === 'timeline') loadTimeline();
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// TREEMAP
+// ═════════════════════════════════════════════════════════════════════════════
+
+const files = (SNAPSHOT.files || []).sort((a, b) => a.health_score - b.health_score);
+let treemapRendered = false;
+
+function renderTreemap() {
+  if (treemapRendered) return;
+  treemapRendered = true;
+
+  const svg = document.getElementById('treemap-svg');
+  const wrap = svg.parentElement;
+  const W = wrap.clientWidth;
+  const H = Math.max(480, Math.round(W * 0.55));
+  svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+  svg.setAttribute('height', H);
+
+  // Build input nodes — value = LOC (min 10 so tiny files still appear)
+  const nodes = files.map((f, i) => ({ f, i, value: Math.max(f.loc || 10, 10) }));
+
+  const rects = squarify(nodes, 0, 0, W, H);
+  const PAD = 1.5;
+
+  rects.forEach(r => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.classList.add('treemap-node');
+    g.dataset.idx = r.i;
+
+    // Background rect
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', r.x + PAD);
+    rect.setAttribute('y', r.y + PAD);
+    rect.setAttribute('width',  Math.max(r.w - PAD*2, 0));
+    rect.setAttribute('height', Math.max(r.h - PAD*2, 0));
+    rect.setAttribute('rx', 3);
+    rect.setAttribute('fill', healthColour(r.f.health_score));
+    g.appendChild(rect);
+
+    // Label (only if rect is big enough)
+    const rw = r.w - PAD*2;
+    const rh = r.h - PAD*2;
+    if (rw > 50 && rh > 22) {
+      const maxChars = Math.floor(rw / 7);
+      const parts = r.f.path.split('/');
+      let label = parts[parts.length - 1] || r.f.path;
+      if (label.length > maxChars) label = label.slice(0, maxChars - 1) + '…';
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', r.x + PAD + rw / 2);
+      text.setAttribute('y', r.y + PAD + rh / 2);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'middle');
+      text.setAttribute('fill', 'rgba(255,255,255,0.9)');
+      text.setAttribute('font-size', Math.min(12, rh * 0.35));
+      text.setAttribute('font-family', 'system-ui,sans-serif');
+      text.classList.add('treemap-label');
+      text.textContent = label;
+      g.appendChild(text);
+
+      // Score badge for larger rects
+      if (rh > 44 && rw > 70) {
+        const score = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        score.setAttribute('x', r.x + PAD + rw / 2);
+        score.setAttribute('y', r.y + PAD + rh / 2 + 14);
+        score.setAttribute('text-anchor', 'middle');
+        score.setAttribute('dominant-baseline', 'middle');
+        score.setAttribute('fill', 'rgba(255,255,255,0.65)');
+        score.setAttribute('font-size', 10);
+        score.setAttribute('font-family', 'system-ui,sans-serif');
+        score.classList.add('treemap-label');
+        score.textContent = Math.round(r.f.health_score * 100);
+        g.appendChild(score);
+      }
+    }
+
+    g.addEventListener('mouseenter', e => showTooltip(e, r.f));
+    g.addEventListener('mousemove',  e => moveTooltip(e));
+    g.addEventListener('mouseleave', hideTooltip);
+    g.addEventListener('click', () => openPanel(r.i));
+
+    svg.appendChild(g);
+  });
+
+  // Re-render if container width changed (e.g. panel opened)
+  const observer = new ResizeObserver(() => {
+    if (wrap.clientWidth !== W) { treemapRendered = false; svg.innerHTML = ''; renderTreemap(); }
+  });
+  observer.observe(wrap);
+}
+
+// ── Squarified treemap algorithm ──────────────────────────────────────────────
+
+function squarify(nodes, x, y, w, h) {
+  if (!nodes.length || w <= 0 || h <= 0) return [];
+  const total = nodes.reduce((s, n) => s + n.value, 0);
+  const scaled = nodes.map(n => ({...n, _v: n.value * (w * h) / total}));
+  return _layout(scaled, x, y, w, h);
+}
+
+function _layout(items, x, y, w, h) {
+  if (!items.length) return [];
+  if (items.length === 1) return [{...items[0], x, y, w, h}];
+
+  const isHoriz = w >= h;
+  const side    = isHoriz ? w : h;
+
+  // Greedy row selection: keep adding items while worst aspect ratio improves
+  let row = [], rowSum = 0, prevWorst = Infinity, cutAt = items.length;
+
+  for (let i = 0; i < items.length; i++) {
+    const candidate = [...row, items[i]];
+    const candidateSum = rowSum + items[i]._v;
+    const worst = _worstRatio(candidate, candidateSum, side);
+
+    if (row.length > 0 && worst > prevWorst) { cutAt = i; break; }
+
+    row = candidate;
+    rowSum = candidateSum;
+    prevWorst = worst;
+  }
+
+  // Place row
+  const rowRects = _placeRow(row, rowSum, x, y, w, h, isHoriz, side);
+
+  // Recurse on remainder
+  const thickness = rowSum / side;
+  const [rx, ry, rw, rh] = isHoriz
+    ? [x, y + thickness, w, h - thickness]
+    : [x + thickness, y, w - thickness, h];
+
+  return [...rowRects, ..._layout(items.slice(cutAt), rx, ry, rw, rh)];
+}
+
+function _worstRatio(row, rowSum, side) {
+  const thickness = rowSum / side;
+  let worst = 0;
+  for (const item of row) {
+    const len = item._v / thickness;
+    worst = Math.max(worst, Math.max(thickness / len, len / thickness));
+  }
+  return worst;
+}
+
+function _placeRow(row, rowSum, x, y, w, h, isHoriz, side) {
+  const thickness = rowSum / side;
+  const results = [];
+  let pos = 0;
+  for (const item of row) {
+    const len = item._v / thickness;
+    results.push(isHoriz
+      ? {...item, x: x + pos, y,           w: len,       h: thickness}
+      : {...item, x,           y: y + pos,  w: thickness, h: len}
+    );
+    pos += len;
+  }
+  return results;
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(e, f) {
+  const topSmells = (f.smells || [])
+    .filter(s => s.severity !== 'ok')
+    .sort((a, b) => (a.severity==='fail'?0:1) - (b.severity==='fail'?0:1))
+    .slice(0, 3);
+
+  tooltip.innerHTML =
+    '<div class="tt-path">' + esc(f.path) + '</div>' +
+    '<div class="tt-score" style="color:'+healthColour(f.health_score)+'">' +
+      Math.round(f.health_score*100) +
+      ' <span style="font-size:.875rem;font-weight:400;color:#94a3b8">' + f.status + '</span>' +
+    '</div>' +
+    '<div class="tt-meta">'+f.loc+' LOC · CCN '+f.cyclomatic+' · churn '+f.churn_30d+'d</div>' +
+    (topSmells.length ? '<div class="tt-smells">' + topSmells.map(s =>
+      (s.severity==='fail'?'✖ ':'⚠ ') + s.detail
+    ).join('<br>') + '</div>' : '');
+
+  moveTooltip(e);
+  tooltip.classList.add('visible');
+}
+
+function moveTooltip(e) {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const tw = 280, pad = 16;
+  let left = e.clientX + 14;
+  let top  = e.clientY - 10;
+  if (left + tw + pad > vw) left = e.clientX - tw - 14;
+  if (top + 150 > vh)       top  = vh - 160;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top  = top  + 'px';
+}
+
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// Render treemap immediately (it's the default tab)
+renderTreemap();
+
+// ═════════════════════════════════════════════════════════════════════════════
+// FILES TABLE
+// ═════════════════════════════════════════════════════════════════════════════
+
+document.getElementById('fileCount').textContent = '(' + files.length + ')';
+
+document.getElementById('filesBody').innerHTML = files.map((f, i) => {
+  const smellsHtml = (f.smells || []).slice(0,3).map(sm =>
+    '<span class="smell-tag '+sm.severity+'">' + sm.type.replace(/_/g,' ') + '</span>'
+  ).join('');
+  return '<tr data-idx="'+i+'" onclick="openPanel('+i+')">' +
+    '<td><span class="file-path">'+esc(f.path)+'</span></td>' +
+    '<td><span class="score-num '+scoreColourClass(f.health_score)+'">'+Math.round(f.health_score*100)+'</span></td>' +
+    '<td>'+pill(f.status)+'</td>' +
+    '<td>'+f.loc+'</td>' +
+    '<td>'+f.cyclomatic+'</td>' +
+    '<td>'+f.churn_30d+'</td>' +
+    '<td><div class="smells">'+smellsHtml+'</div></td>' +
+    '</tr>';
+}).join('');
+
+// ═════════════════════════════════════════════════════════════════════════════
+// TIMELINE
+// ═════════════════════════════════════════════════════════════════════════════
+
+let timelineLoaded = false;
+
+async function loadTimeline() {
+  if (timelineLoaded) return;
+  timelineLoaded = true;
+
+  const loading = document.getElementById('timeline-loading');
+  const canvas  = document.getElementById('timeline-canvas');
+
+  try {
+    // Try static URL first (GitHub Pages: index.json at repo root),
+    // then fall back to local dev API server
+    let index = null;
+    for (const url of ['./index.json', '/api/index']) {
+      try {
+        const r = await fetch(url);
+        if (r.ok) { index = await r.json(); break; }
+      } catch { /* try next */ }
+    }
+    if (!index) throw new Error('no index available');
+
+    if (!index.snapshots || index.snapshots.length < 2) {
+      loading.textContent = 'Not enough history yet — run more scans to see trends.';
+      return;
+    }
+
+    // Sort by timestamp ascending, then deduplicate — keep only the latest
+    // snapshot per commit hash (removes duplicate scans of the same state)
+    const byCommit = new Map();
+    for (const s of index.snapshots) {
+      const existing = byCommit.get(s.commit);
+      if (!existing || new Date(s.timestamp) > new Date(existing.timestamp)) {
+        byCommit.set(s.commit, s);
+      }
+    }
+
+    const points = [...byCommit.values()]
+      .map(s => ({ date: new Date(s.timestamp), score: s.summary.health_score, commit: s.commit }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    loading.style.display = 'none';
+    canvas.style.display  = 'block';
+    drawTimeline(canvas, points, index.snapshots);
+
+  } catch (e) {
+    loading.textContent = 'No history data found. Run codehealth serve locally, or push metrics to see the timeline on GitHub Pages.';
+  }
+}
+
+function drawTimeline(canvas, points, snapshots) {
+  const wrap  = canvas.parentElement;
+  const W     = wrap.clientWidth - 40; // account for padding
+  const H     = 320;
+  const PAD   = { top: 20, right: 20, bottom: 40, left: 48 };
+  const PLOT_W = W - PAD.left - PAD.right;
+  const PLOT_H = H - PAD.top  - PAD.bottom;
+
+  canvas.width  = W;
+  canvas.height = H;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const minDate = points[0].date.getTime();
+  const maxDate = points[points.length-1].date.getTime();
+  const dateRange = maxDate - minDate || 1;
+
+  function toX(date) { return PAD.left + ((date.getTime() - minDate) / dateRange) * PLOT_W; }
+  function toY(score) { return PAD.top + (1 - score) * PLOT_H; }
+
+  // ── Grid lines ──────────────────────────────────────────────────────────
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth   = 1;
+  [0, 0.25, 0.5, 0.75, 1.0].forEach(score => {
+    const y = toY(score);
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + PLOT_W, y); ctx.stroke();
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font      = '11px system-ui';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(score*100), PAD.left - 6, y + 4);
+  });
+
+  // Threshold lines
+  [[0.75, '#16a34a', 'green'], [0.5, '#d97706', 'amber']].forEach(([score, colour, label]) => {
+    const y = toY(score);
+    ctx.strokeStyle = colour + '40';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + PLOT_W, y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = colour;
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, PAD.left + PLOT_W + 4, y + 4);
+  });
+
+  // ── Overall health line ──────────────────────────────────────────────────
+  const lineColour = '#2563eb';
+  ctx.strokeStyle = lineColour;
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    const x = toX(p.date), y = toY(p.score);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // ── Dots with regression markers ─────────────────────────────────────────
+  points.forEach((p, i) => {
+    const x = toX(p.date), y = toY(p.score);
+    const prev = points[i - 1];
+    const isRegression = prev && (prev.score - p.score) > 0.05;
+
+    ctx.beginPath();
+    ctx.arc(x, y, isRegression ? 5 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle   = isRegression ? '#dc2626' : lineColour;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth   = 1.5;
+    ctx.fill();
+    ctx.stroke();
+
+    // Regression label
+    if (isRegression) {
+      ctx.fillStyle = '#dc2626';
+      ctx.font      = '10px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('↓', x, y - 10);
+    }
+  });
+
+  // ── X-axis date labels ───────────────────────────────────────────────────
+  const maxLabels = Math.min(points.length, Math.floor(PLOT_W / 80));
+  const step = Math.max(1, Math.floor(points.length / maxLabels));
+  ctx.fillStyle = '#94a3b8';
+  ctx.font      = '11px system-ui';
+  ctx.textAlign = 'center';
+  points.forEach((p, i) => {
+    if (i % step !== 0 && i !== points.length - 1) return;
+    const x = toX(p.date);
+    ctx.fillText(p.date.toLocaleDateString(undefined, { month:'short', day:'numeric' }), x, H - PAD.bottom + 20);
+  });
+
+  // ── Legend ───────────────────────────────────────────────────────────────
+  document.getElementById('timeline-legend').innerHTML =
+    '<div class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>Overall health</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>Regression (>5pt drop)</div>';
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// DETAIL PANEL
+// ═════════════════════════════════════════════════════════════════════════════
+
+const panel      = document.getElementById('detailPanel');
+const panelHeader = document.getElementById('panelHeader');
+const panelBody  = document.getElementById('panelBody');
+const mainEl     = document.getElementById('main');
+let activeIdx    = -1;
+
+function openPanel(idx) {
+  if (activeIdx === idx) { closePanel(); return; }
+  activeIdx = idx;
+
+  document.querySelectorAll('tbody tr').forEach((r, i) => r.classList.toggle('active', i === idx));
+  document.querySelectorAll('.treemap-node').forEach(n =>
+    n.style.opacity = (parseInt(n.dataset.idx) === idx) ? '1' : '0.7'
+  );
+
+  const f = files[idx];
+  const assessments = getAssessments(f.path);
+  renderPanelHeader(f);
+  renderPanelBody(f, assessments);
+
+  panel.classList.add('open');
+  mainEl.classList.add('panel-open');
+  treemapRendered = false; // force re-render at new width
+}
+
+function closePanel() {
+  activeIdx = -1;
+  panel.classList.remove('open');
+  mainEl.classList.remove('panel-open');
+  document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('active'));
+  document.querySelectorAll('.treemap-node').forEach(n => n.style.opacity = '');
+  treemapRendered = false;
+}
+
+function getAssessments(filePath) {
+  const entry = (SNAPSHOT.agent_assessments?.files || []).find(f => f.path === filePath);
+  return entry ? entry.assessments : [];
+}
+
+function renderPanelHeader(f) {
+  const score = Math.round(f.health_score * 100);
+  const circ  = 2 * Math.PI * 28;
+  const offset = circ * (1 - f.health_score);
+  const arcColour = f.health_score >= 0.75 ? '#16a34a' : f.health_score >= 0.5 ? '#d97706' : '#dc2626';
+
+  panelHeader.innerHTML =
+    '<div class="score-arc-wrap" style="flex:1;min-width:0">' +
+      '<div class="score-arc">' +
+        '<svg width="72" height="72" viewBox="0 0 72 72">' +
+          '<circle cx="36" cy="36" r="28" fill="none" stroke="#e2e8f0" stroke-width="6"/>' +
+          '<circle cx="36" cy="36" r="28" fill="none" stroke="'+arcColour+'" stroke-width="6"' +
+            ' stroke-dasharray="'+circ.toFixed(1)+'" stroke-dashoffset="'+offset.toFixed(1)+'"' +
+            ' stroke-linecap="round"/>' +
+        '</svg>' +
+        '<div class="score-arc-num ' + scoreColourClass(f.health_score) + '">'+score+'</div>' +
+      '</div>' +
+      '<div class="score-arc-info">' +
+        '<div class="panel-file-path">'+esc(f.path)+'</div>' +
+        '<div class="panel-header-meta">' + pill(f.status) +
+          '<span>'+f.module+'</span>' +
+          (f.coverage != null ? '<span>Coverage: '+pct(f.coverage)+'</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<button class="panel-close" onclick="closePanel()" title="Close">✕</button>';
+}
+
+function renderPanelBody(f, assessments) {
+  let html = '';
+
+  // Metrics grid
+  html += '<div class="panel-section"><div class="panel-section-title">Metrics</div>';
+  html += '<div class="metrics-grid">';
+  [
+    { label:'Lines of Code', value:f.loc,                    warn:200,  fail:500  },
+    { label:'Cyclomatic',    value:f.cyclomatic,              warn:7,    fail:12   },
+    { label:'Cognitive',     value:f.cognitive,               warn:10,   fail:20   },
+    { label:'Duplication',   value:pct(f.duplication_ratio),  warnR:0.05, failR:0.15, raw:f.duplication_ratio },
+    { label:'Churn 30d',     value:f.churn_30d,               warn:10,   fail:20   },
+    { label:'Dead Exports',  value:f.dead_exports,            warn:3,    fail:8    },
+    { label:'Fan-in',        value:f.coupling?.fan_in  ?? 0  },
+    { label:'Fan-out',       value:f.coupling?.fan_out ?? 0, warn:7,    fail:12   },
+  ].forEach(m => {
+    let cls = '';
+    if (m.fail  != null && m.value  >= m.fail)  cls = 'fail';
+    else if (m.warn != null && m.value  >= m.warn)  cls = 'warn';
+    if (m.failR != null && m.raw   >= m.failR) cls = 'fail';
+    else if (m.warnR != null && m.raw >= m.warnR) cls = 'warn';
+    html += '<div class="metric-cell"><div class="metric-cell-label">'+m.label+'</div>' +
+            '<div class="metric-cell-value '+cls+'">'+m.value+'</div></div>';
+  });
+  html += '</div></div>';
+
+  // Smells
+  if (f.smells?.length) {
+    const sorted = [...f.smells].sort((a,b) => ({fail:0,warn:1,ok:2}[a.severity])-({fail:0,warn:1,ok:2}[b.severity]));
+    html += '<div class="panel-section"><div class="panel-section-title">Smells ('+f.smells.length+')</div>';
+    sorted.forEach(sm => {
+      const icon   = sm.severity==='fail'?'✖':sm.severity==='warn'?'⚠':'✓';
+      const colour = sm.severity==='fail'?'var(--red)':sm.severity==='warn'?'var(--amber)':'var(--green)';
+      html += '<div class="smell-row"><span style="color:'+colour+';flex-shrink:0">'+icon+'</span>' +
+              '<div><div>'+sm.type.replace(/_/g,' ')+'</div><div class="smell-detail">'+esc(sm.detail)+'</div></div></div>';
+    });
+    html += '</div>';
+  }
+
+  // Functions
+  if (f.functions?.length) {
+    const maxLoc = Math.max(...f.functions.map(fn => fn.loc), 1);
+    html += '<div class="panel-section"><div class="panel-section-title">Functions ('+f.functions.length+')</div>';
+    html += '<table class="fn-table"><thead><tr><th>Name</th><th>Lines</th><th>LOC</th><th>Cycl.</th><th>Params</th><th>Issues</th></tr></thead><tbody>';
+    f.functions.forEach(fn => {
+      const locPct = Math.min((fn.loc / maxLoc) * 100, 100);
+      const locCls  = fn.loc >= 60 ? 'fail' : fn.loc >= 25 ? 'warn' : '';
+      const cyclCls = fn.cyclomatic >= 12 ? 'c-red' : fn.cyclomatic >= 7 ? 'c-amber' : '';
+      const fnSmells = (fn.smells || []).filter(s => s.severity !== 'ok');
+      html += '<tr>' +
+        '<td><span class="fn-name">'+esc(fn.name)+'</span></td>' +
+        '<td style="color:var(--text-muted);font-size:.75rem">'+fn.line_start+'–'+fn.line_end+'</td>' +
+        '<td><span class="fn-loc-bar-wrap"><span class="fn-loc-bar '+locCls+'" style="width:'+locPct.toFixed(0)+'%"></span></span>' +
+          ' <span style="font-size:.75rem'+(locCls?';color:var(--'+(locCls==='fail'?'red':'amber')+')':'')+'">'+fn.loc+'</span></td>' +
+        '<td class="'+cyclCls+'">'+fn.cyclomatic+'</td>' +
+        '<td style="color:'+(fn.parameter_count>=5?'var(--red)':fn.parameter_count>=3?'var(--amber)':'inherit')+'">'+fn.parameter_count+'</td>' +
+        '<td><div class="smells">'+fnSmells.map(s=>'<span class="smell-tag '+s.severity+'">'+s.type.replace(/_/g,' ')+'</span>').join('')+'</div></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+
+  // LLM assessments
+  if (assessments?.length) {
+    const sorted = [...assessments].sort((a,b) => ({fail:0,warn:1,ok:2}[a.severity])-({fail:0,warn:1,ok:2}[b.severity]));
+    html += '<div class="panel-section"><div class="panel-section-title">LLM Assessments ('+assessments.length+')</div>';
+    sorted.forEach(a => {
+      html += '<div class="assessment-card '+a.severity+'">' +
+        '<div class="assessment-header">' +
+          '<span class="pill pill-'+a.severity+'">'+a.severity+'</span>' +
+          '<span class="assessment-type">'+a.type.replace(/_/g,' ')+'</span>' +
+          '<span class="assessment-conf">confidence '+Math.round(a.confidence*100)+'%</span>' +
+        '</div>' +
+        '<div class="assessment-detail">'+esc(a.detail)+'</div>' +
+        (a.lines_of_concern?.length ? '<div class="assessment-lines">Lines: '+a.lines_of_concern.join(', ')+'</div>' : '') +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
+  panelBody.innerHTML = html;
+}
+
+// Keyboard close
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+</script>
+</body>
+</html>
