@@ -131,54 +131,48 @@ async function attemptRemediation(
   logger.dim(`  → Creating branch: ${branchName}`);
 
   try {
-    // Create a fix branch from current HEAD
     git(['checkout', '-b', branchName], cwd);
-
-    // Generate the fix using Claude
-    const fix = await generateFix(candidate, action, cwd, config, client);
-    if (!fix) {
-      git(['checkout', '-'], cwd);
-      git(['branch', '-D', branchName], cwd);
-      return { success: false, reason: 'LLM could not generate a valid fix', attemptedAction: action };
-    }
-
-    // Apply the fix
-    applyFix(candidate.file.path, fix.content, cwd);
-
-    // Commit it
-    git(['add', candidate.file.path], cwd);
-    git(['commit', '-m', `fix(codehealth): ${fix.description}\n\n${fix.rationale}`], cwd);
-
-    // Run tests
-    if (config.dynamic_metrics.test_command) {
-      const testPassed = runTests(config.dynamic_metrics.test_command, cwd);
-      if (!testPassed) {
-        git(['checkout', '-'], cwd);
-        git(['branch', '-D', branchName], cwd);
-        return { success: false, reason: 'Tests failed after applying fix', attemptedAction: action };
-      }
-    }
-
-    // Tests passed — merge to main branch (or leave branch for review)
-    // For v1, we leave the branch for human review and report success
+    const result = await runFixOnBranch(candidate, action, branchName, config, cwd, client);
     git(['checkout', '-'], cwd);
-    logger.dim(`  Branch ready for review: ${branchName}`);
-
-    return { success: true, reason: '', attemptedAction: action };
-
+    return result;
   } catch (err) {
-    // Ensure we're back on the original branch
-    try {
-      git(['checkout', '-'], cwd);
-      git(['branch', '-D', branchName], cwd);
-    } catch { /* best effort */ }
-
-    return {
-      success: false,
-      reason: (err as Error).message,
-      attemptedAction: action,
-    };
+    rollbackBranch(branchName, cwd);
+    return { success: false, reason: (err as Error).message, attemptedAction: action };
   }
+}
+
+async function runFixOnBranch(
+  candidate: PrioritisedFile,
+  action: RemediationAction,
+  branchName: string,
+  config: CodeHealthConfig,
+  cwd: string,
+  client: Anthropic
+): Promise<RemediationAttempt> {
+  const fix = await generateFix(candidate, action, cwd, config, client);
+  if (!fix) {
+    rollbackBranch(branchName, cwd);
+    return { success: false, reason: 'LLM could not generate a valid fix', attemptedAction: action };
+  }
+
+  applyFix(candidate.file.path, fix.content, cwd);
+  git(['add', candidate.file.path], cwd);
+  git(['commit', '-m', `fix(codehealth): ${fix.description}\n\n${fix.rationale}`], cwd);
+
+  if (config.dynamic_metrics.test_command && !runTests(config.dynamic_metrics.test_command, cwd)) {
+    rollbackBranch(branchName, cwd);
+    return { success: false, reason: 'Tests failed after applying fix', attemptedAction: action };
+  }
+
+  logger.dim(`  Branch ready for review: ${branchName}`);
+  return { success: true, reason: '', attemptedAction: action };
+}
+
+function rollbackBranch(branchName: string, cwd: string): void {
+  try {
+    git(['checkout', '-'], cwd);
+    git(['branch', '-D', branchName], cwd);
+  } catch { /* best effort */ }
 }
 
 // ─── LLM fix generation ───────────────────────────────────────────────────────

@@ -153,6 +153,25 @@ async function detectCompetingImplementations(
 
 // ─── LLM call wrapper ─────────────────────────────────────────────────────────
 
+function parseSeverity(raw: unknown): 'ok' | 'warn' | 'fail' {
+  if (raw === 'ok' || raw === 'fail') return raw;
+  return 'warn';
+}
+
+function buildAssessment(type: AssessmentType, parsed: Record<string, unknown>): Assessment {
+  const linesOfConcern = Array.isArray(parsed.lines_of_concern) ? parsed.lines_of_concern as number[] : [];
+  const relatedFiles   = Array.isArray(parsed.related_files)   ? parsed.related_files   as string[] : [];
+  return {
+    type,
+    score:      clamp(parsed.score      ?? 0.5),
+    confidence: clamp(parsed.confidence ?? 0.5),
+    severity:   parseSeverity(parsed.severity),
+    detail:     typeof parsed.detail === 'string' ? parsed.detail : '',
+    ...(linesOfConcern.length ? { lines_of_concern: linesOfConcern } : {}),
+    ...(relatedFiles.length   ? { related_files:    relatedFiles   } : {}),
+  };
+}
+
 async function runAssessment(
   type: AssessmentType,
   systemPrompt: string,
@@ -177,21 +196,7 @@ async function runAssessment(
       return null;
     }
 
-    const severity = (parsed.severity as string) === 'ok' || (parsed.severity as string) === 'fail'
-      ? (parsed.severity as 'ok' | 'warn' | 'fail')
-      : 'warn';
-    const linesOfConcern = Array.isArray(parsed.lines_of_concern) ? parsed.lines_of_concern as number[] : [];
-    const relatedFiles = Array.isArray(parsed.related_files) ? parsed.related_files as string[] : [];
-
-    return {
-      type,
-      score: clamp(parsed.score ?? 0.5),
-      confidence: clamp(parsed.confidence ?? 0.5),
-      severity,
-      detail: typeof parsed.detail === 'string' ? parsed.detail : '',
-      ...(linesOfConcern.length ? { lines_of_concern: linesOfConcern } : {}),
-      ...(relatedFiles.length ? { related_files: relatedFiles } : {}),
-    };
+    return buildAssessment(type, parsed);
   } catch (err) {
     logger.warn(`Assessment ${type} failed: ${(err as Error).message}`);
     return null;

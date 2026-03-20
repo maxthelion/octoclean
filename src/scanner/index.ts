@@ -11,6 +11,7 @@ import type {
   FileMetrics,
   FunctionMetrics,
   Smell,
+  SmellType,
   CouplingMetrics,
   ModuleConfig,
 } from '../types/index.js';
@@ -237,57 +238,88 @@ interface SmellInputs {
   fanOut: number;
 }
 
+// ─── Declarative smell rules ──────────────────────────────────────────────────
+
+interface SmellRule {
+  type: SmellType;
+  value: (m: SmellInputs) => number;
+  warn: (t: CodeHealthConfig['thresholds']) => number;
+  fail: (t: CodeHealthConfig['thresholds']) => number;
+  detail: (value: number, failThreshold: number) => string;
+}
+
+const SMELL_RULES: SmellRule[] = [
+  {
+    type: 'high_complexity',
+    value: m => m.loc,
+    warn: t => t.loc_warn,
+    fail: t => t.loc_fail,
+    detail: (v, f) => `${v} lines, threshold ${f}`,
+  },
+  {
+    type: 'high_complexity',
+    value: m => m.cyclomatic,
+    warn: t => t.cyclomatic_warn,
+    fail: t => t.cyclomatic_fail,
+    detail: (v, f) => `Cyclomatic complexity ${v}, threshold ${f}`,
+  },
+  {
+    type: 'high_cognitive_complexity',
+    value: m => m.cognitive,
+    warn: t => t.cognitive_warn,
+    fail: t => t.cognitive_fail,
+    detail: (v, f) => `Cognitive complexity ${v}, threshold ${f}`,
+  },
+  {
+    type: 'high_duplication',
+    value: m => m.duplicationRatio,
+    warn: t => t.duplication_warn,
+    fail: t => t.duplication_fail,
+    detail: (v, f) => `${Math.round(v * 100)}% duplicate blocks, threshold ${Math.round(f * 100)}%`,
+  },
+  {
+    type: 'dead_export',
+    value: m => m.deadExports,
+    warn: t => t.dead_export_warn,
+    fail: t => t.dead_export_fail,
+    detail: (v, f) => `${v} unused exports, threshold ${f}`,
+  },
+  {
+    type: 'high_fan_out',
+    value: m => m.fanOut,
+    warn: t => t.coupling_fan_out_warn,
+    fail: t => t.coupling_fan_out_fail,
+    detail: (v, f) => `Fan-out ${v}, threshold ${f}`,
+  },
+];
+
+function evaluateRule(rule: SmellRule, metrics: SmellInputs, t: CodeHealthConfig['thresholds']): Smell | null {
+  const value = rule.value(metrics);
+  const failThreshold = rule.fail(t);
+  if (value >= failThreshold) return { type: rule.type, severity: 'fail', detail: rule.detail(value, failThreshold) };
+  if (value >= rule.warn(t))  return { type: rule.type, severity: 'warn', detail: rule.detail(value, failThreshold) };
+  return null;
+}
+
 function buildFileSmells(
   metrics: SmellInputs,
   t: CodeHealthConfig['thresholds']
 ): Smell[] {
-  const smells: Smell[] = [];
+  const smells: Smell[] = SMELL_RULES
+    .map(rule => evaluateRule(rule, metrics, t))
+    .filter((s): s is Smell => s !== null);
 
-  if (metrics.loc >= t.loc_fail) {
-    smells.push({ type: 'high_complexity', severity: 'fail', detail: `${metrics.loc} lines, threshold ${t.loc_fail}` });
-  } else if (metrics.loc >= t.loc_warn) {
-    smells.push({ type: 'high_complexity', severity: 'warn', detail: `${metrics.loc} lines, threshold ${t.loc_fail}` });
-  }
-
-  if (metrics.cyclomatic >= t.cyclomatic_fail) {
-    smells.push({ type: 'high_complexity', severity: 'fail', detail: `Cyclomatic complexity ${metrics.cyclomatic}, threshold ${t.cyclomatic_fail}` });
-  } else if (metrics.cyclomatic >= t.cyclomatic_warn) {
-    smells.push({ type: 'high_complexity', severity: 'warn', detail: `Cyclomatic complexity ${metrics.cyclomatic}, threshold ${t.cyclomatic_fail}` });
-  }
-
-  if (metrics.cognitive >= t.cognitive_fail) {
-    smells.push({ type: 'high_cognitive_complexity', severity: 'fail', detail: `Cognitive complexity ${metrics.cognitive}, threshold ${t.cognitive_fail}` });
-  } else if (metrics.cognitive >= t.cognitive_warn) {
-    smells.push({ type: 'high_cognitive_complexity', severity: 'warn', detail: `Cognitive complexity ${metrics.cognitive}, threshold ${t.cognitive_fail}` });
-  }
-
-  if (metrics.duplicationRatio >= t.duplication_fail) {
-    smells.push({ type: 'high_duplication', severity: 'fail', detail: `${Math.round(metrics.duplicationRatio * 100)}% duplicate blocks, threshold ${Math.round(t.duplication_fail * 100)}%` });
-  } else if (metrics.duplicationRatio >= t.duplication_warn) {
-    smells.push({ type: 'high_duplication', severity: 'warn', detail: `${Math.round(metrics.duplicationRatio * 100)}% duplicate blocks, threshold ${Math.round(t.duplication_fail * 100)}%` });
-  }
-
+  // Coverage is inverted (lower = worse) so handled separately
   if (metrics.coverage !== null) {
+    const cov = Math.round(metrics.coverage * 100);
     if (metrics.coverage < t.coverage_fail) {
-      smells.push({ type: 'low_coverage', severity: 'fail', detail: `${Math.round(metrics.coverage * 100)}% line coverage, threshold ${Math.round(t.coverage_fail * 100)}%` });
+      smells.push({ type: 'low_coverage', severity: 'fail', detail: `${cov}% line coverage, threshold ${Math.round(t.coverage_fail * 100)}%` });
     } else if (metrics.coverage < t.coverage_warn) {
-      smells.push({ type: 'low_coverage', severity: 'warn', detail: `${Math.round(metrics.coverage * 100)}% line coverage, threshold ${Math.round(t.coverage_warn * 100)}%` });
+      smells.push({ type: 'low_coverage', severity: 'warn', detail: `${cov}% line coverage, threshold ${Math.round(t.coverage_warn * 100)}%` });
     }
   }
 
-  if (metrics.deadExports >= t.dead_export_fail) {
-    smells.push({ type: 'dead_export', severity: 'fail', detail: `${metrics.deadExports} unused exports, threshold ${t.dead_export_fail}` });
-  } else if (metrics.deadExports >= t.dead_export_warn) {
-    smells.push({ type: 'dead_export', severity: 'warn', detail: `${metrics.deadExports} unused exports, threshold ${t.dead_export_fail}` });
-  }
-
-  if (metrics.fanOut >= t.coupling_fan_out_fail) {
-    smells.push({ type: 'high_fan_out', severity: 'fail', detail: `Fan-out ${metrics.fanOut}, threshold ${t.coupling_fan_out_fail}` });
-  } else if (metrics.fanOut >= t.coupling_fan_out_warn) {
-    smells.push({ type: 'high_fan_out', severity: 'warn', detail: `Fan-out ${metrics.fanOut}, threshold ${t.coupling_fan_out_fail}` });
-  }
-
-  // Compound smell: high churn + low coverage
+  // Compound: high churn + low coverage
   if (metrics.churn30d > 5 && metrics.coverage !== null && metrics.coverage < t.coverage_warn) {
     smells.push({
       type: 'high_churn_low_coverage',
