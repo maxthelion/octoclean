@@ -55,13 +55,15 @@ codehealth backfill --days 30   # one commit per day for the last 30 days
 
 | Command | Description |
 |---------|-------------|
-| `codehealth init` | Initialise config, .gitignore, metrics branch |
+| `codehealth init` | Initialise config, .gitignore, metrics branch, GitHub Actions workflow |
 | `codehealth scan` | Full mechanical scan + optional LLM assessments |
 | `codehealth scan --quick` | Fast scan: lizard only on changed files, for use in autoresearch loops |
 | `codehealth report` | Print summary to stdout |
 | `codehealth report --agent` | Structured text output for LLM agents |
 | `codehealth export --autoresearch` | Generate autoresearch session files (see below) |
 | `codehealth serve` | Serve the dashboard locally |
+| `codehealth pages` | Build static dashboard for GitHub Pages |
+| `codehealth pages --enable` | One-time: push metrics branch + enable GitHub Pages via `gh` |
 | `codehealth backfill --days N` | Populate historical timeline |
 | `codehealth diff <from> <to>` | Compare health between two points |
 | `codehealth history list` | Show all snapshots |
@@ -196,6 +198,44 @@ dynamic_metrics:
 ```
 
 **Important:** set `main_branch` to the branch your project actually develops on. octoclean uses this for backfill commit sampling and churn calculation.
+
+---
+
+## GitHub Pages
+
+octoclean can publish a live, auto-updating dashboard to GitHub Pages. You can see octoclean scanning itself at **[maxthelion.github.io/octoclean](https://maxthelion.github.io/octoclean/)**.
+
+### Setup (three commands)
+
+```bash
+codehealth init          # creates config + .github/workflows/octoclean.yml
+codehealth scan          # initial scan
+codehealth pages --enable  # pushes metrics branch + enables Pages via gh CLI
+```
+
+Then commit and push the workflow:
+
+```bash
+git add .github .codehealth
+git push
+```
+
+From that point on, every push to your main branch triggers the GitHub Action which scans, rebuilds `index.html`, and pushes it to the `codehealth-metrics` branch. GitHub Pages serves the updated dashboard automatically.
+
+The workflow file created by `codehealth init` (`.github/workflows/octoclean.yml`) also runs nightly at 2am UTC, so the timeline stays current even on quiet days.
+
+### Requirements
+
+- `gh` CLI installed and authenticated (`gh auth login`) for `--enable`
+- The repo must be public, or have GitHub Pages enabled on the plan
+
+### Manual setup (without gh CLI)
+
+If you prefer not to use `gh`:
+
+1. Run `codehealth pages --push` to build and push `index.html`
+2. Go to repo **Settings → Pages**
+3. Set source to **Deploy from a branch**, branch `codehealth-metrics`, folder `/ (root)`
 
 ---
 
