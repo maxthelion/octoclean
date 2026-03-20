@@ -103,23 +103,6 @@ export function writeMultipleToMetricsBranch(
   cwd: string
 ): void {
   try {
-    const currentTree = git(['rev-parse', `${METRICS_BRANCH}^{tree}`], cwd);
-
-    // Build a new tree incrementally
-    let treeHash = currentTree;
-    for (const file of files) {
-      // Create a blob for each file
-      const blobHash = execSync(
-        `echo ${JSON.stringify(file.content)} | git hash-object -w --stdin`,
-        { cwd, encoding: 'utf8' }
-      ).trim();
-
-      // We'd need to read-tree + update-index for proper tree building.
-      // For simplicity, use a worktree approach via git stash:
-      writeToLocal(file.path, file.content, cwd);
-    }
-
-    // For a clean implementation, commit all local files:
     commitLocalToMetricsBranch(files, commitMessage, cwd);
   } catch (err) {
     logger.warn(`Metrics branch write failed: ${(err as Error).message}. Using local fallback.`);
