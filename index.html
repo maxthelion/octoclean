@@ -485,8 +485,8 @@ function moveTooltip(e) {
 
 function hideTooltip() { tooltip.classList.remove('visible'); }
 
-// Render treemap immediately (it's the default tab)
-renderTreemap();
+// Defer treemap render to ensure browser has completed layout and clientWidth is non-zero
+requestAnimationFrame(() => requestAnimationFrame(renderTreemap));
 
 // ═════════════════════════════════════════════════════════════════════════════
 // FILES TABLE
