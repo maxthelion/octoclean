@@ -11,6 +11,7 @@ import { serveDashboard } from '../dashboard/server.js';
 import { runDiff } from './diff.js';
 import { runBackfill } from './backfill.js';
 import { runHistory } from './history.js';
+import { runPages } from './pages.js';
 import type { ScanOptions, ReportOptions, ServeOptions } from '../types/index.js';
 
 const program = new Command();
@@ -47,6 +48,7 @@ program
   .option('--commits <n>',        'Override history_depth for this run', parseInt)
   .option('--since <YYYY-MM-DD>', 'Scan commits since a specific date')
   .option('--push-metrics',       'Push results to codehealth-metrics branch', false)
+  .option('--pages',              'Build and push static dashboard after scanning (for GitHub Pages)', false)
   .option('--no-llm',             'Skip LLM assessment pass')
   .option('--no-dynamic',         'Skip coverage even if configured')
   .option('--output <path>',      'Write JSON snapshot to a local file')
@@ -65,6 +67,7 @@ Examples:
       since:       opts.since,
       ref:         undefined,
       pushMetrics: opts.pushMetrics ?? false,
+      pages:       opts.pages       ?? false,
       noLlm:       opts.noLlm      ?? false,
       noDynamic:   opts.noDynamic   ?? false,
       output:      opts.output,
@@ -202,6 +205,32 @@ Examples:
     const cwd = findProjectRoot();
     try {
       await runDiff({ from, to }, cwd);
+    } catch (err) {
+      logger.error((err as Error).message);
+      process.exit(1);
+    }
+  });
+
+// ─── pages ────────────────────────────────────────────────────────────────────
+
+program
+  .command('pages')
+  .description('Build static dashboard and write to codehealth-metrics branch for GitHub Pages')
+  .option('--push', 'Push codehealth-metrics to remote after building', false)
+  .addHelpText('after', `
+Writes index.html to the root of the codehealth-metrics branch.
+
+GitHub Pages setup (one-time, in repo Settings → Pages):
+  Source: Deploy from a branch
+  Branch: codehealth-metrics   Folder: / (root)
+
+Examples:
+  codehealth pages
+  codehealth pages --push`)
+  .action(async (opts) => {
+    const cwd = findProjectRoot();
+    try {
+      await runPages({ push: opts.push ?? false }, cwd);
     } catch (err) {
       logger.error((err as Error).message);
       process.exit(1);

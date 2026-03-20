@@ -528,9 +528,16 @@ async function loadTimeline() {
   const canvas  = document.getElementById('timeline-canvas');
 
   try {
-    const idxRes = await fetch('/api/index');
-    if (!idxRes.ok) throw new Error('API not available');
-    const index = await idxRes.json();
+    // Try static URL first (GitHub Pages: index.json at repo root),
+    // then fall back to local dev API server
+    let index = null;
+    for (const url of ['./index.json', '/api/index']) {
+      try {
+        const r = await fetch(url);
+        if (r.ok) { index = await r.json(); break; }
+      } catch { /* try next */ }
+    }
+    if (!index) throw new Error('no index available');
 
     if (!index.snapshots || index.snapshots.length < 2) {
       loading.textContent = 'Not enough history yet — run more scans to see trends.';
@@ -556,7 +563,7 @@ async function loadTimeline() {
     drawTimeline(canvas, points, index.snapshots);
 
   } catch (e) {
-    loading.textContent = 'Timeline requires codehealth serve — open the dashboard with: codehealth serve --open';
+    loading.textContent = 'No history data found. Run codehealth serve locally, or push metrics to see the timeline on GitHub Pages.';
   }
 }
 

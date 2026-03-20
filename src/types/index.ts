@@ -277,6 +277,7 @@ export interface ScanOptions {
   since?: string;
   ref?: string;
   pushMetrics: boolean;
+  pages: boolean;
   noLlm: boolean;
   noDynamic: boolean;
   output?: string;

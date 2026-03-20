@@ -1,0 +1,55 @@
+name: octoclean
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'   # nightly at 2am UTC
+  workflow_dispatch:       # allow manual runs
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # needed to push to codehealth-metrics branch
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history required for churn metrics and backfill
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Python (for lizard)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install lizard
+        run: pip install lizard
+
+      - name: Install octoclean and analysis tools
+        run: npm install -g octoclean jscpd madge ts-unused-exports
+
+      - name: Configure git identity (for metrics branch commits)
+        run: |
+          git config user.name  "octoclean"
+          git config user.email "octoclean@users.noreply.github.com"
+
+      - name: Initialise octoclean (if not already done)
+        run: |
+          if [ ! -f .codehealth/config.yaml ]; then
+            codehealth init
+          fi
+
+      - name: Scan
+        run: codehealth scan --no-llm --push-metrics --pages
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}  # optional: enables LLM assessments
+
+      - name: Push metrics branch
+        run: git push origin codehealth-metrics

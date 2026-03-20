@@ -1,5 +1,6 @@
 import ora from 'ora';
 import { logger } from '../utils/logger.js';
+import { runPages } from './pages.js';
 import { runScan } from '../scanner/index.js';
 import { scoreFiles, aggregateModules, computeSummary } from '../scorer/index.js';
 import { runAssessments } from '../assessor/index.js';
@@ -82,7 +83,12 @@ export async function runScanCommand(
 
     saveSnapshot(snapshot, cwd, options.pushMetrics);
 
-    // ── 4. Write to output file if requested ──────────────────────────────────
+    // ── 4. Build GitHub Pages static site if requested ────────────────────────
+    if (options.pages) {
+      await runPages({ push: options.pushMetrics }, cwd);
+    }
+
+    // ── 5. Write to output file if requested ──────────────────────────────────
     if (options.output) {
       const fs = await import('node:fs');
       fs.writeFileSync(options.output, JSON.stringify(snapshot, null, 2), 'utf8');
