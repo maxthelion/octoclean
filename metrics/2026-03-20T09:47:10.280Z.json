@@ -1,0 +1,2810 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-03-20T09:47:10.280Z",
+  "commit": "7a4c9733",
+  "commit_message": "fix: serve now uses buildDashboard — fallback html was being shown instead",
+  "repo": "octoclean",
+  "summary": {
+    "health_score": 0.61,
+    "trend": "stable",
+    "trend_delta": 0,
+    "coverage": null,
+    "total_loc": 4535,
+    "files_analysed": 37,
+    "red_files": 21,
+    "amber_files": 4,
+    "green_files": 12
+  },
+  "modules": [
+    {
+      "name": "Application",
+      "path": "src/",
+      "health_score": 0.61,
+      "status": "amber",
+      "trend": "stable",
+      "trend_delta": 0,
+      "plain_summary": null,
+      "signals": {
+        "loc": 4535,
+        "coverage": null,
+        "cyclomatic_p50": 15,
+        "cyclomatic_p95": 61,
+        "cognitive_p95": 79,
+        "duplication_ratio": 0,
+        "churn_30d": 42,
+        "dead_exports": 0,
+        "coupling_fan_out_avg": 0
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "src/assessor/file-assessor.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 201,
+      "coverage": null,
+      "cyclomatic": 26,
+      "cognitive": 34,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "201 lines, threshold 500"
+        },
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 26, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 34, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "assessFile",
+          "line_start": 32,
+          "line_end": 55,
+          "loc": 24,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 5,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "5 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "assessFunction",
+          "line_start": 66,
+          "line_end": 102,
+          "loc": 37,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "37 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "detectCompetingImplementations",
+          "line_start": 113,
+          "line_end": 143,
+          "loc": 31,
+          "cyclomatic": 8,
+          "cognitive": 10,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "31 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 8, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 10, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "clamp",
+          "line_start": 189,
+          "line_end": 195,
+          "loc": 7,
+          "cyclomatic": 6,
+          "cognitive": 8,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "clamp",
+          "line_start": 280,
+          "line_end": 283,
+          "loc": 4,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/index.ts",
+      "module": "Application",
+      "health_score": 0.48,
+      "status": "red",
+      "loc": 102,
+      "coverage": null,
+      "cyclomatic": 13,
+      "cognitive": 17,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 13, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 17, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "buildEmptyAssessments",
+          "line_start": 49,
+          "line_end": 70,
+          "loc": 22,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "&gt;",
+          "line_start": 110,
+          "line_end": 110,
+          "loc": 1,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "&gt;",
+          "line_start": 110,
+          "line_end": 110,
+          "loc": 1,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "execute",
+          "line_start": 112,
+          "line_end": 118,
+          "loc": 7,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "Promise",
+          "line_start": 111,
+          "line_end": 118,
+          "loc": 8,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/prompts/competing-implementation.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 39,
+      "coverage": null,
+      "cyclomatic": 1,
+      "cognitive": 1,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": [
+        {
+          "name": "buildPrompt",
+          "line_start": 5,
+          "line_end": 41,
+          "loc": 37,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "37 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/prompts/docstring-faithfulness.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 39,
+      "coverage": null,
+      "cyclomatic": 1,
+      "cognitive": 1,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": [
+        {
+          "name": "buildPrompt",
+          "line_start": 7,
+          "line_end": 41,
+          "loc": 35,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "35 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/prompts/intent-clarity.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 31,
+      "coverage": null,
+      "cyclomatic": 1,
+      "cognitive": 1,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": [
+        {
+          "name": "buildPrompt",
+          "line_start": 5,
+          "line_end": 33,
+          "loc": 29,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "29 lines, threshold 60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/prompts/naming-coherence.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 31,
+      "coverage": null,
+      "cyclomatic": 1,
+      "cognitive": 1,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": [
+        {
+          "name": "buildPrompt",
+          "line_start": 5,
+          "line_end": 33,
+          "loc": 29,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "29 lines, threshold 60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/selector.ts",
+      "module": "Application",
+      "health_score": 0.81,
+      "status": "green",
+      "loc": 34,
+      "coverage": null,
+      "cyclomatic": 9,
+      "cognitive": 12,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 9, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 12, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "computePriority",
+          "line_start": 36,
+          "line_end": 37,
+          "loc": 2,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/assessor/synthesis.ts",
+      "module": "Application",
+      "health_score": 0.81,
+      "status": "green",
+      "loc": 65,
+      "coverage": null,
+      "cyclomatic": 9,
+      "cognitive": 12,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 9, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 12, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "synthesiseModuleSummaries",
+          "line_start": 19,
+          "line_end": 32,
+          "loc": 14,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "generateModuleSummary",
+          "line_start": 39,
+          "line_end": 62,
+          "loc": 24,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/cli/assess.ts",
+      "module": "Application",
+      "health_score": 0.72,
+      "status": "amber",
+      "loc": 50,
+      "coverage": null,
+      "cyclomatic": 10,
+      "cognitive": 13,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 10, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 13, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runAssessCommand",
+          "line_start": 12,
+          "line_end": 53,
+          "loc": 42,
+          "cyclomatic": 7,
+          "cognitive": 9,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "42 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 7, threshold 12"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/cli/diff.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 91,
+      "coverage": null,
+      "cyclomatic": 28,
+      "cognitive": 36,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 28, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 36, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runDiff",
+          "line_start": 5,
+          "line_end": 17,
+          "loc": 13,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "printDiff",
+          "line_start": 21,
+          "line_end": 95,
+          "loc": 75,
+          "cyclomatic": 20,
+          "cognitive": 26,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "75 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 20, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "fail",
+              "detail": "Cognitive complexity 26, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/cli/index.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 160,
+      "coverage": null,
+      "cyclomatic": 26,
+      "cognitive": 34,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 26, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 34, threshold 20"
+        }
+      ],
+      "functions": []
+    },
+    {
+      "path": "src/cli/init.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 44,
+      "coverage": null,
+      "cyclomatic": 5,
+      "cognitive": 7,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": [
+        {
+          "name": "runInit",
+          "line_start": 8,
+          "line_end": 45,
+          "loc": 38,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "38 lines, threshold 60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/cli/report.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 184,
+      "coverage": null,
+      "cyclomatic": 61,
+      "cognitive": 79,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 61, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 79, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runReport",
+          "line_start": 5,
+          "line_end": 28,
+          "loc": 24,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "files",
+          "line_start": 150,
+          "line_end": 150,
+          "loc": 1,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "printAgentReport",
+          "line_start": 34,
+          "line_end": 98,
+          "loc": 65,
+          "cyclomatic": 19,
+          "cognitive": 25,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "65 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 19, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "fail",
+              "detail": "Cognitive complexity 25, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "printMarkdownReport",
+          "line_start": 158,
+          "line_end": 216,
+          "loc": 59,
+          "cyclomatic": 14,
+          "cognitive": 18,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "59 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 14, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 18, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/cli/scan.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 101,
+      "coverage": null,
+      "cyclomatic": 17,
+      "cognitive": 22,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 17, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 22, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runScanCommand",
+          "line_start": 11,
+          "line_end": 79,
+          "loc": 69,
+          "cyclomatic": 7,
+          "cognitive": 9,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "69 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 7, threshold 12"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "printScanSummary",
+          "line_start": 101,
+          "line_end": 123,
+          "loc": 23,
+          "cyclomatic": 8,
+          "cognitive": 10,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 8, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 10, threshold 20"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/config/defaults.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 157,
+      "coverage": null,
+      "cyclomatic": 0,
+      "cognitive": 0,
+      "duplication_ratio": 0,
+      "churn_30d": 2,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": []
+    },
+    {
+      "path": "src/config/index.test.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 90,
+      "coverage": null,
+      "cyclomatic": 7,
+      "cognitive": 9,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 7, threshold 12"
+        }
+      ],
+      "functions": []
+    },
+    {
+      "path": "src/config/index.ts",
+      "module": "Application",
+      "health_score": 1,
+      "status": "green",
+      "loc": 104,
+      "coverage": null,
+      "cyclomatic": 5,
+      "cognitive": 7,
+      "duplication_ratio": 0,
+      "churn_30d": 2,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [],
+      "functions": [
+        {
+          "name": "findConfigFile",
+          "line_start": 104,
+          "line_end": 114,
+          "loc": 11,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/dashboard/builder.ts",
+      "module": "Application",
+      "health_score": 0.87,
+      "status": "green",
+      "loc": 615,
+      "coverage": null,
+      "cyclomatic": 1,
+      "cognitive": 1,
+      "duplication_ratio": 0,
+      "churn_30d": 2,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "615 lines, threshold 500"
+        }
+      ],
+      "functions": [
+        {
+          "name": "buildDashboard",
+          "line_start": 8,
+          "line_end": 621,
+          "loc": 614,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "614 lines, threshold 60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/dashboard/server.ts",
+      "module": "Application",
+      "health_score": 0.39,
+      "status": "red",
+      "loc": 63,
+      "coverage": null,
+      "cyclomatic": 17,
+      "cognitive": 22,
+      "duplication_ratio": 0,
+      "churn_30d": 2,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 17, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 22, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "serveDashboard",
+          "line_start": 12,
+          "line_end": 20,
+          "loc": 9,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "noSnapshotHtml",
+          "line_start": 73,
+          "line_end": 80,
+          "loc": 8,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/metrics/branch.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 150,
+      "coverage": null,
+      "cyclomatic": 18,
+      "cognitive": 23,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 18, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 23, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "ensureMetricsBranch",
+          "line_start": 22,
+          "line_end": 51,
+          "loc": 30,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "30 lines, threshold 60"
+            }
+          ]
+        },
+        {
+          "name": "readFromMetricsBranch",
+          "line_start": 63,
+          "line_end": 73,
+          "loc": 11,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "writeToMetricsBranch",
+          "line_start": 82,
+          "line_end": 96,
+          "loc": 15,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "writeMultipleToMetricsBranch",
+          "line_start": 100,
+          "line_end": 123,
+          "loc": 24,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "pushMetricsBranch",
+          "line_start": 134,
+          "line_end": 198,
+          "loc": 65,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 8,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "65 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "8 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/metrics/index.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 129,
+      "coverage": null,
+      "cyclomatic": 24,
+      "cognitive": 31,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 24, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 31, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "buildSnapshot",
+          "line_start": 27,
+          "line_end": 50,
+          "loc": 24,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "saveSnapshot",
+          "line_start": 53,
+          "line_end": 86,
+          "loc": 34,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "34 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "loadLatestSnapshot",
+          "line_start": 99,
+          "line_end": 104,
+          "loc": 6,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "loadSnapshot",
+          "line_start": 106,
+          "line_end": 115,
+          "loc": 10,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "loadSnapshotByDate",
+          "line_start": 118,
+          "line_end": 126,
+          "loc": 9,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "loadIndex",
+          "line_start": 134,
+          "line_end": 151,
+          "loc": 18,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "resolveSnapshotRef",
+          "line_start": 156,
+          "line_end": 166,
+          "loc": 11,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/remediation/index.ts",
+      "module": "Application",
+      "health_score": 0.37,
+      "status": "red",
+      "loc": 258,
+      "coverage": null,
+      "cyclomatic": 28,
+      "cognitive": 36,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "258 lines, threshold 500"
+        },
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 28, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 36, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runRemediation",
+          "line_start": 33,
+          "line_end": 97,
+          "loc": 65,
+          "cyclomatic": 12,
+          "cognitive": 16,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "65 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 12, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 16, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "reason",
+          "line_start": 178,
+          "line_end": 182,
+          "loc": 5,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "String",
+          "line_start": 222,
+          "line_end": 227,
+          "loc": 6,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "buildFixPrompt",
+          "line_start": 229,
+          "line_end": 315,
+          "loc": 87,
+          "cyclomatic": 10,
+          "cognitive": 13,
+          "parameter_count": 8,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "87 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 10, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 13, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "8 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/remediation/prioritiser.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 77,
+      "coverage": null,
+      "cyclomatic": 29,
+      "cognitive": 38,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 29, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 38, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "prioritiseFiles",
+          "line_start": 22,
+          "line_end": 87,
+          "loc": 66,
+          "cyclomatic": 21,
+          "cognitive": 27,
+          "parameter_count": 9,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "66 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 21, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "fail",
+              "detail": "Cognitive complexity 27, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "9 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/remediation/quarantine.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 65,
+      "coverage": null,
+      "cyclomatic": 18,
+      "cognitive": 23,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 18, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 23, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "loadQuarantine",
+          "line_start": 15,
+          "line_end": 24,
+          "loc": 10,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "saveQuarantine",
+          "line_start": 26,
+          "line_end": 31,
+          "loc": 6,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "isQuarantined",
+          "line_start": 34,
+          "line_end": 39,
+          "loc": 6,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getQuarantineEntry",
+          "line_start": 41,
+          "line_end": 44,
+          "loc": 4,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "recordFailure",
+          "line_start": 47,
+          "line_end": 75,
+          "loc": 29,
+          "cyclomatic": 6,
+          "cognitive": 8,
+          "parameter_count": 5,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "29 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "5 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "releaseFromQuarantine",
+          "line_start": 80,
+          "line_end": 84,
+          "loc": 5,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getActiveQuarantineEntries",
+          "line_start": 87,
+          "line_end": 91,
+          "loc": 5,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/coverage.ts",
+      "module": "Application",
+      "health_score": 0.72,
+      "status": "amber",
+      "loc": 77,
+      "coverage": null,
+      "cyclomatic": 10,
+      "cognitive": 13,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 10, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 13, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runCoverage",
+          "line_start": 41,
+          "line_end": 65,
+          "loc": 25,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "25 lines, threshold 60"
+            }
+          ]
+        },
+        {
+          "name": "readExistingCoverage",
+          "line_start": 76,
+          "line_end": 106,
+          "loc": 31,
+          "cyclomatic": 6,
+          "cognitive": 8,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "31 lines, threshold 60"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/index.ts",
+      "module": "Application",
+      "health_score": 0.38,
+      "status": "red",
+      "loc": 234,
+      "coverage": null,
+      "cyclomatic": 72,
+      "cognitive": 94,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "234 lines, threshold 500"
+        },
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 72, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 94, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runScan",
+          "line_start": 46,
+          "line_end": 134,
+          "loc": 89,
+          "cyclomatic": 41,
+          "cognitive": 53,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "89 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 41, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "fail",
+              "detail": "Cognitive complexity 53, threshold 20"
+            }
+          ]
+        },
+        {
+          "name": "discoverFiles",
+          "line_start": 200,
+          "line_end": 206,
+          "loc": 7,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "resolveModule",
+          "line_start": 209,
+          "line_end": 226,
+          "loc": 18,
+          "cyclomatic": 6,
+          "cognitive": 8,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "buildFileSmells",
+          "line_start": 240,
+          "line_end": 290,
+          "loc": 51,
+          "cyclomatic": 19,
+          "cognitive": 25,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "51 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 19, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "fail",
+              "detail": "Cognitive complexity 25, threshold 20"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/jscpd.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 104,
+      "coverage": null,
+      "cyclomatic": 15,
+      "cognitive": 20,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 15, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 20, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runJscpd",
+          "line_start": 53,
+          "line_end": 108,
+          "loc": 56,
+          "cyclomatic": 11,
+          "cognitive": 14,
+          "parameter_count": 6,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "56 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 11, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 14, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "6 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "refineDuplicationRatios",
+          "line_start": 132,
+          "line_end": 147,
+          "loc": 16,
+          "cyclomatic": 4,
+          "cognitive": 5,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/lizard.ts",
+      "module": "Application",
+      "health_score": 0.38,
+      "status": "red",
+      "loc": 216,
+      "coverage": null,
+      "cyclomatic": 18,
+      "cognitive": 23,
+      "duplication_ratio": 0,
+      "churn_30d": 2,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "216 lines, threshold 500"
+        },
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 18, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 23, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runLizard",
+          "line_start": 54,
+          "line_end": 95,
+          "loc": 42,
+          "cyclomatic": 6,
+          "cognitive": 8,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "42 lines, threshold 60"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "estimateCognitive",
+          "line_start": 259,
+          "line_end": 262,
+          "loc": 4,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getFunctionSmells",
+          "line_start": 265,
+          "line_end": 288,
+          "loc": 24,
+          "cyclomatic": 9,
+          "cognitive": 12,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 9, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 12, threshold 20"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/madge.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 81,
+      "coverage": null,
+      "cyclomatic": 27,
+      "cognitive": 35,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 27, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 35, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runMadge",
+          "line_start": 27,
+          "line_end": 46,
+          "loc": 20,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "buildCouplingMetrics",
+          "line_start": 55,
+          "line_end": 76,
+          "loc": 22,
+          "cyclomatic": 13,
+          "cognitive": 17,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 13, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 17, threshold 20"
+            }
+          ]
+        },
+        {
+          "name": "dfs",
+          "line_start": 102,
+          "line_end": 108,
+          "loc": 7,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "findCircularDeps",
+          "line_start": 97,
+          "line_end": 114,
+          "loc": 18,
+          "cyclomatic": 6,
+          "cognitive": 8,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/unused-exports.ts",
+      "module": "Application",
+      "health_score": 0.62,
+      "status": "amber",
+      "loc": 58,
+      "coverage": null,
+      "cyclomatic": 11,
+      "cognitive": 14,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 11, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 14, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "runUnusedExports",
+          "line_start": 31,
+          "line_end": 58,
+          "loc": 28,
+          "cyclomatic": 8,
+          "cognitive": 10,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "warn",
+              "detail": "28 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "warn",
+              "detail": "Cyclomatic complexity 8, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 10, threshold 20"
+            }
+          ]
+        },
+        {
+          "name": "parseUnusedExports",
+          "line_start": 69,
+          "line_end": 82,
+          "loc": 14,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/scanner/versioned-symbols.test.ts",
+      "module": "Application",
+      "health_score": 0.72,
+      "status": "amber",
+      "loc": 45,
+      "coverage": null,
+      "cyclomatic": 10,
+      "cognitive": 13,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "Cyclomatic complexity 10, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 13, threshold 20"
+        }
+      ],
+      "functions": []
+    },
+    {
+      "path": "src/scanner/versioned-symbols.ts",
+      "module": "Application",
+      "health_score": 0.48,
+      "status": "red",
+      "loc": 68,
+      "coverage": null,
+      "cyclomatic": 13,
+      "cognitive": 17,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 13, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "warn",
+          "detail": "Cognitive complexity 17, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "detectVersionedSymbols",
+          "line_start": 21,
+          "line_end": 82,
+          "loc": 62,
+          "cyclomatic": 13,
+          "cognitive": 17,
+          "parameter_count": 6,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "giant_function",
+              "severity": "fail",
+              "detail": "62 lines, threshold 60"
+            },
+            {
+              "type": "high_complexity",
+              "severity": "fail",
+              "detail": "Cyclomatic complexity 13, threshold 12"
+            },
+            {
+              "type": "high_cognitive_complexity",
+              "severity": "warn",
+              "detail": "Cognitive complexity 17, threshold 20"
+            },
+            {
+              "type": "too_many_parameters",
+              "severity": "fail",
+              "detail": "6 parameters, threshold 5"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "src/scorer/index.test.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 126,
+      "coverage": null,
+      "cyclomatic": 19,
+      "cognitive": 25,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 19, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 25, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "makeFile",
+          "line_start": 6,
+          "line_end": 22,
+          "loc": 17,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/scorer/index.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 188,
+      "coverage": null,
+      "cyclomatic": 35,
+      "cognitive": 46,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 35, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 46, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "getWeights",
+          "line_start": 38,
+          "line_end": 51,
+          "loc": 14,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "scoreToStatus",
+          "line_start": 118,
+          "line_end": 121,
+          "loc": 4,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "scoreFiles",
+          "line_start": 125,
+          "line_end": 128,
+          "loc": 4,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "files.reduce",
+          "line_start": 183,
+          "line_end": 183,
+          "loc": 1,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "files.reduce",
+          "line_start": 183,
+          "line_end": 192,
+          "loc": 10,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "mean",
+          "line_start": 214,
+          "line_end": 220,
+          "loc": 7,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "linearPenalty",
+          "line_start": 229,
+          "line_end": 234,
+          "loc": 6,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 4,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "4 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "scoreToStatus",
+          "line_start": 235,
+          "line_end": 240,
+          "loc": 6,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "deltaToTrend",
+          "line_start": 241,
+          "line_end": 257,
+          "loc": 17,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/types/index.ts",
+      "module": "Application",
+      "health_score": 0.97,
+      "status": "green",
+      "loc": 267,
+      "coverage": null,
+      "cyclomatic": 0,
+      "cognitive": 0,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "warn",
+          "detail": "267 lines, threshold 500"
+        }
+      ],
+      "functions": []
+    },
+    {
+      "path": "src/utils/git.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 153,
+      "coverage": null,
+      "cyclomatic": 33,
+      "cognitive": 43,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 33, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 43, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "git",
+          "line_start": 6,
+          "line_end": 17,
+          "loc": 12,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getRepoName",
+          "line_start": 22,
+          "line_end": 29,
+          "loc": 8,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getCurrentCommit",
+          "line_start": 31,
+          "line_end": 34,
+          "loc": 4,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getCurrentCommitShort",
+          "line_start": 35,
+          "line_end": 38,
+          "loc": 4,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getCommitMessage",
+          "line_start": 39,
+          "line_end": 42,
+          "loc": 4,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 2,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "hasRemote",
+          "line_start": 43,
+          "line_end": 52,
+          "loc": 10,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "getMergeCommits",
+          "line_start": 64,
+          "line_end": 71,
+          "loc": 8,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "getWeeklyCommits",
+          "line_start": 76,
+          "line_end": 85,
+          "loc": 10,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "getEveryCommit",
+          "line_start": 97,
+          "line_end": 104,
+          "loc": 8,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "getCommitsSince",
+          "line_start": 108,
+          "line_end": 115,
+          "loc": 8,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "getChangedFiles",
+          "line_start": 121,
+          "line_end": 128,
+          "loc": 8,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "getChurn",
+          "line_start": 132,
+          "line_end": 142,
+          "loc": 11,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "getCoChangedFiles",
+          "line_start": 147,
+          "line_end": 169,
+          "loc": 23,
+          "cyclomatic": 5,
+          "cognitive": 7,
+          "parameter_count": 3,
+          "coverage": null,
+          "smells": [
+            {
+              "type": "too_many_parameters",
+              "severity": "warn",
+              "detail": "3 parameters, threshold 5"
+            }
+          ]
+        },
+        {
+          "name": "metricsBranchExists",
+          "line_start": 184,
+          "line_end": 192,
+          "loc": 9,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "ensureMetricsBranch",
+          "line_start": 196,
+          "line_end": 210,
+          "loc": 15,
+          "cyclomatic": 3,
+          "cognitive": 4,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "weekKey",
+          "line_start": 226,
+          "line_end": 232,
+          "loc": 7,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    },
+    {
+      "path": "src/utils/logger.ts",
+      "module": "Application",
+      "health_score": 0.4,
+      "status": "red",
+      "loc": 38,
+      "coverage": null,
+      "cyclomatic": 15,
+      "cognitive": 20,
+      "duplication_ratio": 0,
+      "churn_30d": 1,
+      "dead_exports": 0,
+      "coupling": {
+        "fan_in": 0,
+        "fan_out": 0
+      },
+      "smells": [
+        {
+          "type": "high_complexity",
+          "severity": "fail",
+          "detail": "Cyclomatic complexity 15, threshold 12"
+        },
+        {
+          "type": "high_cognitive_complexity",
+          "severity": "fail",
+          "detail": "Cognitive complexity 20, threshold 20"
+        }
+      ],
+      "functions": [
+        {
+          "name": "setLogLevel",
+          "line_start": 14,
+          "line_end": 20,
+          "loc": 7,
+          "cyclomatic": 1,
+          "cognitive": 1,
+          "parameter_count": 1,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "debug",
+          "line_start": 23,
+          "line_end": 25,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "info",
+          "line_start": 26,
+          "line_end": 28,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "warn",
+          "line_start": 29,
+          "line_end": 31,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "error",
+          "line_start": 32,
+          "line_end": 34,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "success",
+          "line_start": 35,
+          "line_end": 37,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "step",
+          "line_start": 38,
+          "line_end": 40,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        },
+        {
+          "name": "dim",
+          "line_start": 41,
+          "line_end": 43,
+          "loc": 3,
+          "cyclomatic": 2,
+          "cognitive": 3,
+          "parameter_count": 0,
+          "coverage": null,
+          "smells": []
+        }
+      ]
+    }
+  ],
+  "drift_signals": {
+    "versioned_symbols": [],
+    "dead_export_growth": null
+  },
+  "agent_assessments": {
+    "generated_at": "2026-03-20T09:47:10.256Z",
+    "model": "claude-haiku-4-5",
+    "prompt_version": "1.0.0",
+    "files": []
+  }
+}
