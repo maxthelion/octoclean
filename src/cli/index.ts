@@ -10,6 +10,7 @@ import { runRemediation } from '../remediation/index.js';
 import { serveDashboard } from '../dashboard/server.js';
 import { runDiff } from './diff.js';
 import { runAssessCommand } from './assess.js';
+import { runBackfill } from './backfill.js';
 import type { ScanOptions, ReportOptions, AssessOptions, RemediateOptions, ServeOptions } from '../types/index.js';
 
 const program = new Command();
@@ -168,6 +169,42 @@ program
       await serveDashboard(options, cwd);
     } catch (err) {
       logger.error((err as Error).message);
+      process.exit(1);
+    }
+  });
+
+// ─── backfill ─────────────────────────────────────────────────────────────────
+
+program
+  .command('backfill')
+  .description('Generate historical snapshots by scanning past commits via git worktrees')
+  .option('--days <n>',    'One commit per day for the last N days', parseInt)
+  .option('--since <YYYY-MM-DD>', 'All commits since a specific date')
+  .option('--commits <n>', 'Last N commits (uses sampling strategy from config)', parseInt)
+  .option('--no-llm',      'Skip LLM assessments (default for backfill)', true)
+  .option('--push-metrics','Push results to codehealth-metrics branch after backfill', false)
+  .option('--dry-run',     'Show which commits would be scanned without scanning', false)
+  .addHelpText('after', `
+Examples:
+  codehealth backfill --days 10
+  codehealth backfill --since 2026-01-01
+  codehealth backfill --commits 20 --push-metrics
+  codehealth backfill --days 30 --dry-run`)
+  .action(async (opts) => {
+    const cwd    = findProjectRoot();
+    const config = loadConfig(cwd);
+    try {
+      await runBackfill({
+        days:        opts.days,
+        since:       opts.since,
+        commits:     opts.commits,
+        noLlm:       opts.noLlm ?? true,
+        pushMetrics: opts.pushMetrics ?? false,
+        dryRun:      opts.dryRun ?? false,
+      }, config, cwd);
+    } catch (err) {
+      logger.error((err as Error).message);
+      if (program.opts().debug) console.error(err);
       process.exit(1);
     }
   });
