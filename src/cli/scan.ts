@@ -85,7 +85,7 @@ export async function runScanCommand(
 
     // ── 4. Build GitHub Pages static site if requested ────────────────────────
     if (options.pages) {
-      await runPages({ push: options.pushMetrics }, cwd);
+      await runPages({ push: options.pushMetrics, enable: false }, cwd);
     }
 
     // ── 5. Write to output file if requested ──────────────────────────────────

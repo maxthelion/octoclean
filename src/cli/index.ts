@@ -215,22 +215,20 @@ Examples:
 
 program
   .command('pages')
-  .description('Build static dashboard and write to codehealth-metrics branch for GitHub Pages')
-  .option('--push', 'Push codehealth-metrics to remote after building', false)
+  .description('Build static dashboard and publish to GitHub Pages')
+  .option('--push',   'Push codehealth-metrics to remote after building', false)
+  .option('--enable', 'Enable GitHub Pages via gh CLI (one-time setup)', false)
   .addHelpText('after', `
 Writes index.html to the root of the codehealth-metrics branch.
 
-GitHub Pages setup (one-time, in repo Settings → Pages):
-  Source: Deploy from a branch
-  Branch: codehealth-metrics   Folder: / (root)
-
 Examples:
-  codehealth pages
-  codehealth pages --push`)
+  codehealth pages --enable     # one-time: push branch + enable GitHub Pages via gh
+  codehealth pages              # build index.html, commit to metrics branch
+  codehealth pages --push       # build + push to remote`)
   .action(async (opts) => {
     const cwd = findProjectRoot();
     try {
-      await runPages({ push: opts.push ?? false }, cwd);
+      await runPages({ push: opts.push ?? false, enable: opts.enable ?? false }, cwd);
     } catch (err) {
       logger.error((err as Error).message);
       process.exit(1);
