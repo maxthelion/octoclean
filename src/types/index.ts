@@ -269,24 +269,10 @@ export interface IndexFile {
   snapshots: IndexEntry[];
 }
 
-// ─── Quarantine ───────────────────────────────────────────────────────────────
-
-export interface QuarantineEntry {
-  path: string;
-  failures: number;
-  last_attempt: string;
-  last_action: RemediationAction;
-  reason: string;
-  quarantined_until: string;
-}
-
-export interface QuarantineStore {
-  entries: Record<string, QuarantineEntry>;
-}
-
 // ─── Scan options (CLI → pipeline) ───────────────────────────────────────────
 
 export interface ScanOptions {
+  quick: boolean;
   commits?: number;
   since?: string;
   ref?: string;
@@ -296,12 +282,6 @@ export interface ScanOptions {
   output?: string;
 }
 
-export interface AssessOptions {
-  file?: string;
-  module?: string;
-  force: boolean;
-}
-
 export interface ReportOptions {
   module?: string;
   format: 'text' | 'json' | 'markdown';
@@ -309,10 +289,8 @@ export interface ReportOptions {
   agent: boolean;
 }
 
-export interface RemediateOptions {
-  dryRun: boolean;
-  file?: string;
-  max?: number;
+export interface ExportOptions {
+  autoresearch?: string; // output directory
 }
 
 export interface ServeOptions {

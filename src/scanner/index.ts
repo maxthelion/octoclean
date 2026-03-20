@@ -16,7 +16,7 @@ import type {
   ModuleConfig,
 } from '../types/index.js';
 import { logger } from '../utils/logger.js';
-import { getChurn, getCurrentCommitShort } from '../utils/git.js';
+import { git, getChurn, getCurrentCommitShort } from '../utils/git.js';
 import { runLizard, getFunctionSmells } from './lizard.js';
 import { runJscpd } from './jscpd.js';
 import { runMadge } from './madge.js';
@@ -40,11 +40,105 @@ export interface ScanContext {
   skipCoverage?: boolean;
   skipLlm?: boolean;
   previousDeadExports?: number;
+  /**
+   * Quick mode: lizard only, changed files only, carry forward previous
+   * metrics for unchanged files. Suitable for autoresearch iteration loops.
+   */
+  quick?: boolean;
+  /** Previous snapshot's file metrics, used by quick mode. */
+  previousFiles?: FileMetrics[];
 }
 
 // ─── Main entry point ─────────────────────────────────────────────────────────
 
 export async function runScan(ctx: ScanContext): Promise<ScanResult> {
+  if (ctx.quick) return runQuickScan(ctx);
+  return runFullScan(ctx);
+}
+
+/**
+ * Quick scan — lizard only, changed files only, carry forward previous
+ * metrics for unchanged files. Designed for autoresearch iteration loops.
+ */
+async function runQuickScan(ctx: ScanContext): Promise<ScanResult> {
+  const { config, cwd } = ctx;
+
+  logger.step('Quick scan (lizard only, changed files)…');
+
+  const allFiles   = await discoverFiles(config, cwd);
+  const changedFiles = getChangedFilesSinceLastSnapshot(cwd, ctx.previousFiles ?? []);
+  const targetFiles  = changedFiles.length > 0 ? changedFiles : allFiles;
+
+  logger.dim(`  ${changedFiles.length} changed, ${allFiles.length - changedFiles.length} carried forward`);
+
+  const lizardResults  = runLizard(targetFiles, cwd) ?? [];
+  const lizardByFile   = new Map(lizardResults.map(r => [r.path, r]));
+  const previousByFile = new Map((ctx.previousFiles ?? []).map(f => [f.path, f]));
+  const commit         = getCurrentCommitShort(cwd);
+  const files: FileMetrics[] = [];
+
+  for (const filePath of allFiles) {
+    const module = resolveModule(filePath, config.modules);
+    if (!module) continue;
+
+    // Carry forward unchanged files from previous snapshot
+    if (!changedFiles.includes(filePath) && previousByFile.has(filePath)) {
+      files.push(previousByFile.get(filePath)!);
+      continue;
+    }
+
+    const lizard    = lizardByFile.get(filePath);
+    const loc       = lizard?.loc ?? countLines(path.join(cwd, filePath));
+    const cyclomatic = lizard?.cyclomatic ?? 0;
+    const cognitive  = lizard?.cognitive  ?? 0;
+    const churn30d   = getChurn(filePath, 30, cwd);
+
+    // Carry forward slow metrics from previous snapshot if available
+    const prev = previousByFile.get(filePath);
+    const duplicationRatio = prev?.duplication_ratio ?? 0;
+    const deadExports      = prev?.dead_exports      ?? 0;
+    const coupling         = prev?.coupling          ?? { fan_in: 0, fan_out: 0 };
+    const coverage         = prev?.coverage          ?? null;
+
+    const smells   = buildFileSmells({ loc, cyclomatic, cognitive, duplicationRatio, coverage, churn30d, deadExports, fanOut: coupling.fan_out }, config.thresholds);
+    const functions: FunctionMetrics[] = (lizard?.functions ?? []).map(fn => ({
+      name:            fn.name,
+      line_start:      fn.line_start,
+      line_end:        fn.line_end,
+      loc:             fn.loc,
+      cyclomatic:      fn.cyclomatic,
+      cognitive:       fn.cognitive,
+      parameter_count: fn.parameter_count,
+      coverage:        null,
+      smells:          getFunctionSmells(fn, config.thresholds),
+    }));
+
+    files.push({
+      path: filePath, module: module.label,
+      health_score: 0, status: 'green',
+      loc, coverage, cyclomatic, cognitive,
+      duplication_ratio: duplicationRatio,
+      churn_30d: churn30d, dead_exports: deadExports, coupling, smells, functions,
+    });
+  }
+
+  return {
+    files,
+    drift_signals: { versioned_symbols: [], dead_export_growth: null },
+  };
+}
+
+function getChangedFilesSinceLastSnapshot(cwd: string, previousFiles: FileMetrics[]): string[] {
+  if (previousFiles.length === 0) return [];
+  try {
+    const output = git(['diff', '--name-only', 'HEAD~1', 'HEAD', '--', '*.js', '*.ts', '*.jsx', '*.tsx'], cwd);
+    return output ? output.split('\n').filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function runFullScan(ctx: ScanContext): Promise<ScanResult> {
   const { config, cwd } = ctx;
   const t = config.thresholds;
 

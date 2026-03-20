@@ -1,7 +1,7 @@
 {
-  "name": "codehealth",
-  "version": "0.1.0",
-  "description": "Code quality analysis across git history — dashboard for humans, structured feed for agents",
+  "name": "octoclean",
+  "version": "0.2.0",
+  "description": "Code quality analysis for JS/TS repos — dashboard for humans, structured feed for agents. Pairs with pi autoresearch for automated fixing.",
   "type": "module",
   "bin": {
     "codehealth": "./bin/codehealth.js"

@@ -25,9 +25,11 @@ export async function runScanCommand(
     const scanResult = await runScan({
       config,
       cwd,
-      skipCoverage: options.noDynamic,
-      skipLlm: options.noLlm,
+      quick:             options.quick,
+      skipCoverage:      options.noDynamic,
+      skipLlm:           options.noLlm,
       previousDeadExports: previousSnapshot?.drift_signals.dead_export_growth?.current,
+      previousFiles:     previousSnapshot?.files,
     });
 
     spinner.text = 'Computing health scores…';
