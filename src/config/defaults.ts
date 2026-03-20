@@ -27,24 +27,24 @@ export const DEFAULT_CONFIG: CodeHealthConfig = {
     max_files_per_night: 40,
   },
   thresholds: {
-    loc_warn: 300,
-    loc_fail: 1000,
-    function_loc_warn: 40,
-    function_loc_fail: 100,
-    cyclomatic_warn: 10,
-    cyclomatic_fail: 20,
-    cognitive_warn: 15,
-    cognitive_fail: 30,
-    duplication_warn: 0.10,
-    duplication_fail: 0.25,
-    parameter_count_warn: 4,
-    parameter_count_fail: 7,
-    coverage_warn: 0.70,
-    coverage_fail: 0.40,
-    coupling_fan_out_warn: 10,
-    coupling_fan_out_fail: 20,
-    dead_export_warn: 5,
-    dead_export_fail: 15,
+    loc_warn: 200,
+    loc_fail: 500,
+    function_loc_warn: 25,
+    function_loc_fail: 60,
+    cyclomatic_warn: 7,
+    cyclomatic_fail: 12,
+    cognitive_warn: 10,
+    cognitive_fail: 20,
+    duplication_warn: 0.05,
+    duplication_fail: 0.15,
+    parameter_count_warn: 3,
+    parameter_count_fail: 5,
+    coverage_warn: 0.80,
+    coverage_fail: 0.60,
+    coupling_fan_out_warn: 7,
+    coupling_fan_out_fail: 12,
+    dead_export_warn: 3,
+    dead_export_fail: 8,
   },
   modules: [
     { path: 'src/', label: 'Application' },
@@ -112,24 +112,24 @@ llm_assessments:
 
 # Thresholds. warn = amber, fail = red.
 thresholds:
-  loc_warn: 300
-  loc_fail: 1000
-  function_loc_warn: 40
-  function_loc_fail: 100
-  cyclomatic_warn: 10
-  cyclomatic_fail: 20
-  cognitive_warn: 15
-  cognitive_fail: 30
-  duplication_warn: 0.10
-  duplication_fail: 0.25
-  parameter_count_warn: 4
-  parameter_count_fail: 7
-  coverage_warn: 0.70
-  coverage_fail: 0.40
-  coupling_fan_out_warn: 10
-  coupling_fan_out_fail: 20
-  dead_export_warn: 5
-  dead_export_fail: 15
+  loc_warn: 200
+  loc_fail: 500
+  function_loc_warn: 25
+  function_loc_fail: 60
+  cyclomatic_warn: 7
+  cyclomatic_fail: 12
+  cognitive_warn: 10
+  cognitive_fail: 20
+  duplication_warn: 0.05
+  duplication_fail: 0.15
+  parameter_count_warn: 3
+  parameter_count_fail: 5
+  coverage_warn: 0.80
+  coverage_fail: 0.60
+  coupling_fan_out_warn: 7
+  coupling_fan_out_fail: 12
+  dead_export_warn: 3
+  dead_export_fail: 8
 
 # Module definitions.
 modules:
